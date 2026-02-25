@@ -3,12 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LearnCodigo | Workspace & Dashboards</title>
+    <title>LearnCodigo | Enterprise OS</title>
     
-    <!-- Dependências Externas -->
+    <!-- Frameworks & Fonts -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-    
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap');
 
@@ -24,6 +23,7 @@
             background-color: var(--bg-dark);
             color: #f4f4f5;
             overflow: hidden;
+            margin: 0;
         }
 
         .font-mono { font-family: 'JetBrains Mono', monospace; }
@@ -45,39 +45,25 @@
             border-color: var(--accent);
         }
 
+        .nav-active {
+            background: rgba(6, 182, 212, 0.1);
+            color: var(--accent) !important;
+            border-right: 3px solid var(--accent);
+        }
+
         .custom-scrollbar::-webkit-scrollbar { width: 5px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #18181b; border-radius: 10px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #27272a; }
-
-        @keyframes slideIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .animate-enter { animation: slideIn 0.3s ease-out forwards; }
-
-        .chat-bubble-me {
-            background: var(--accent);
-            color: black;
-            border-radius: 14px 14px 2px 14px;
-        }
-        .chat-bubble-them {
-            background: #18181b;
-            color: #f4f4f5;
-            border-radius: 14px 14px 14px 2px;
-            border: 1px solid var(--border);
-        }
         
-        .voice-user-tag {
-            animation: pulse-border 2s infinite;
+        .chat-bubble-me { background: var(--accent); color: black; border-radius: 12px 12px 2px 12px; }
+        .chat-bubble-them { background: #18181b; color: #f4f4f5; border-radius: 12px 12px 12px 2px; border: 1px solid var(--border); }
+
+        @keyframes pulse-cyan {
+            0% { box-shadow: 0 0 0 0 rgba(6, 182, 212, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(6, 182, 212, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(6, 182, 212, 0); }
         }
-        
-        @keyframes pulse-border {
-            0% { border-color: rgba(6, 182, 212, 0.2); }
-            50% { border-color: rgba(6, 182, 212, 0.8); }
-            100% { border-color: rgba(6, 182, 212, 0.2); }
-        }
+        .voice-active { animation: pulse-cyan 2s infinite; }
     </style>
 </head>
 <body class="h-screen flex text-sm selection:bg-cyan-500/30">
@@ -85,70 +71,86 @@
     <!-- Sidebar Principal -->
     <aside class="w-64 glass-panel border-r border-zinc-900 flex flex-col z-50">
         <div class="p-6 flex-1 overflow-y-auto custom-scrollbar">
-            <div class="flex items-center gap-3 mb-8">
+            <div class="flex items-center gap-3 mb-10">
                 <div class="w-10 h-10 bg-cyan-500 rounded-xl flex items-center justify-center shadow-lg shadow-cyan-500/20">
-                    <i data-lucide="layout-grid" class="w-6 h-6 text-black"></i>
+                    <i data-lucide="shield-check" class="w-6 h-6 text-black"></i>
                 </div>
-                <h1 class="font-bold text-lg tracking-tight">LearnCodigo<span class="text-cyan-500 italic text-xs ml-1 font-black">OS</span></h1>
+                <div>
+                    <h1 class="font-bold text-lg tracking-tight leading-none">LearnCodigo</h1>
+                    <span class="text-[10px] text-cyan-500 font-mono font-bold">ENTERPRISE OS</span>
+                </div>
             </div>
 
-            <nav class="space-y-1">
+            <nav class="space-y-1 mb-8" id="sidebar-nav">
                 <p class="text-[10px] uppercase font-bold text-zinc-600 tracking-widest px-3 mb-2">Workspace</p>
-                <button onclick="window.router.navigate('dashboard')" class="nav-link w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-white/5 transition-colors text-zinc-400 hover:text-white" data-page="dashboard">
-                    <i data-lucide="bar-chart-3" class="w-4 h-4"></i> Dashboards
+                <button onclick="window.router.navigate('dashboard')" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-zinc-400 hover:bg-white/5 transition-all" data-page="dashboard">
+                    <i data-lucide="layout-grid" class="w-4 h-4"></i> Dashboards
                 </button>
-                <button onclick="window.router.navigate('chat')" class="nav-link w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-white/5 transition-colors text-zinc-400 hover:text-white" data-page="chat">
+                <button onclick="window.router.navigate('chat')" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-zinc-400 hover:bg-white/5 transition-all" data-page="chat">
                     <i data-lucide="message-square" class="w-4 h-4"></i> Comunicação
                 </button>
-                <button onclick="window.router.navigate('pipeline')" class="nav-link w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-white/5 transition-colors text-zinc-400 hover:text-white" data-page="pipeline">
-                    <i data-lucide="activity" class="w-4 h-4"></i> Pipeline
+                <button onclick="window.router.navigate('git')" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-zinc-400 hover:bg-white/5 transition-all" data-page="git">
+                    <i data-lucide="git-branch" class="w-4 h-4"></i> Git & Branches
                 </button>
-                <button onclick="window.router.navigate('branches')" class="nav-link w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-white/5 transition-colors text-zinc-400 hover:text-white" data-page="branches">
-                    <i data-lucide="git-pull-request" class="w-4 h-4"></i> Pull Requests
+                <button onclick="window.router.navigate('pipeline')" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-zinc-400 hover:bg-white/5 transition-all" data-page="pipeline">
+                    <i data-lucide="activity" class="w-4 h-4"></i> Pipeline CI/CD
                 </button>
             </nav>
 
             <div class="mt-8">
-                <p class="text-[10px] uppercase font-bold text-zinc-600 tracking-widest px-3 mb-2">Canais de Voz</p>
-                <div id="voice-rooms" class="space-y-1">
+                <p class="text-[10px] uppercase font-bold text-zinc-600 tracking-widest px-3 mb-3">Canais de Voz</p>
+                <div id="voice-channels-list" class="space-y-1 text-zinc-500">
                     <!-- Dinâmico -->
                 </div>
             </div>
         </div>
 
+        <!-- Perfil Footer -->
         <div class="p-4 border-t border-zinc-900 bg-black/40">
-            <div class="flex items-center gap-3 p-2 rounded-lg hover:bg-white/5 cursor-pointer transition-all">
+            <div class="flex items-center gap-3 p-2 rounded-lg hover:bg-white/5 cursor-pointer">
                 <div class="relative">
-                    <div id="user-avatar" class="w-9 h-9 rounded-full bg-zinc-800 flex items-center justify-center font-bold text-xs uppercase border border-zinc-700">?</div>
+                    <div id="u-avatar" class="w-9 h-9 rounded-full bg-zinc-800 flex items-center justify-center font-bold text-xs uppercase border border-zinc-700">?</div>
                     <div class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 border-2 border-[#030303] rounded-full"></div>
                 </div>
                 <div class="truncate">
-                    <p id="user-display-name" class="font-bold text-xs truncate">A ligar...</p>
-                    <p class="text-[10px] text-zinc-500 font-mono">Senior Dev</p>
+                    <p id="u-name" class="font-bold text-xs truncate">Conectando...</p>
+                    <p class="text-[9px] text-zinc-500 font-mono">SENIOR DEVELOPER</p>
                 </div>
             </div>
         </div>
     </aside>
 
-    <main id="main-content" class="flex-1 flex flex-col relative overflow-hidden bg-[radial-gradient(circle_at_50%_0%,rgba(6,182,212,0.05),transparent)]">
+    <!-- Content Area -->
+    <main class="flex-1 flex flex-col relative overflow-hidden bg-[radial-gradient(circle_at_50%_0%,rgba(6,182,212,0.05),transparent)]">
+        <!-- Top Bar -->
         <header class="h-16 border-b border-zinc-900 flex items-center justify-between px-8 bg-black/20 backdrop-blur-md z-40">
-            <div id="header-title" class="flex items-center gap-4">
-                <h2 class="text-sm font-bold uppercase tracking-widest text-zinc-400">Página Inicial</h2>
+            <div id="view-title" class="flex items-center gap-4 text-xs font-bold uppercase tracking-[0.2em] text-zinc-400">
+                A carregar...
             </div>
             <div class="flex items-center gap-4">
-                <div id="active-team-list" class="flex -space-x-2 mr-4"></div>
-                <button class="p-2 glass-btn rounded-full"><i data-lucide="bell" class="w-4 h-4"></i></button>
-                <button class="p-2 glass-btn rounded-full text-cyan-500"><i data-lucide="zap" class="w-4 h-4 fill-current"></i></button>
+                <div id="online-team" class="flex -space-x-2 mr-4"></div>
+                <div class="h-8 w-[1px] bg-zinc-800 mx-2"></div>
+                <button class="p-2 glass-btn rounded-lg text-zinc-400 hover:text-white transition-all">
+                    <i data-lucide="bell" class="w-4 h-4"></i>
+                </button>
+                <button class="p-2 glass-btn rounded-lg text-cyan-500">
+                    <i data-lucide="zap" class="w-4 h-4 fill-current"></i>
+                </button>
             </div>
         </header>
 
-        <div id="app-viewport" class="flex-1 overflow-y-auto custom-scrollbar p-8">
-            <div class="flex items-center justify-center h-full flex-col gap-4">
+        <!-- Viewport -->
+        <div id="app-viewport" class="flex-1 overflow-y-auto custom-scrollbar">
+            <!-- Loading State -->
+            <div class="h-full flex flex-col items-center justify-center">
                 <div class="w-12 h-12 border-2 border-cyan-500/20 border-t-cyan-500 rounded-full animate-spin"></div>
-                <p class="text-xs font-mono text-zinc-500 animate-pulse">A carregar interface...</p>
+                <p class="mt-4 text-[10px] font-mono text-zinc-500 uppercase tracking-widest">Sincronizando Firebase OS...</p>
             </div>
         </div>
     </main>
+
+    <!-- Modals / Overlays -->
+    <div id="modal-container" class="hidden fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"></div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
@@ -160,74 +162,441 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'learn-codigo-workspace';
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'learncodigo-enterprise';
 
-        // --- Estado Global ---
+        // --- Estado do Sistema ---
         let currentUser = null;
-        let activePage = 'dashboard';
         let teamData = [];
-        let analytics = { individual: {}, collective: {} };
-        let selectedChatId = null;
-        const VOICE_ROOMS = ['Geral', 'Dev Room', 'Coffee Break', 'Reunião'];
+        let activePage = 'dashboard';
+        const VOICE_CHANNELS = ['Geral', 'Desenvolvimento', 'Design & UX', 'Cafetaria'];
 
         // --- Router ---
         window.router = {
             navigate: (page) => {
                 activePage = page;
-                renderPage();
-                updateActiveLink();
+                document.querySelectorAll('[data-page]').forEach(el => {
+                    el.classList.toggle('nav-active', el.dataset.page === page);
+                });
+                renderView();
             }
         };
 
-        const updateActiveLink = () => {
-            document.querySelectorAll('.nav-link').forEach(link => {
-                if (link.dataset.page === activePage) {
-                    link.classList.add('bg-cyan-500/10', 'text-cyan-500');
-                    link.classList.remove('text-zinc-400');
-                } else {
-                    link.classList.remove('bg-cyan-500/10', 'text-cyan-500');
-                    link.classList.add('text-zinc-400');
+        // --- Módulos de Renderização ---
+
+        const renderView = () => {
+            const viewport = document.getElementById('app-viewport');
+            const titleEl = document.getElementById('view-title');
+            if (!viewport || !currentUser) return;
+
+            viewport.innerHTML = '';
+            viewport.className = "flex-1 overflow-y-auto custom-scrollbar p-8";
+
+            switch(activePage) {
+                case 'dashboard':
+                    titleEl.innerHTML = `Performance <span class="text-white mx-2">/</span> Dashboards`;
+                    renderDashboard(viewport);
+                    break;
+                case 'chat':
+                    titleEl.innerHTML = `Comunicação <span class="text-white mx-2">/</span> Mensagens`;
+                    viewport.className = "flex-1 flex overflow-hidden";
+                    renderChat(viewport);
+                    break;
+                case 'git':
+                    titleEl.innerHTML = `Gitflow <span class="text-white mx-2">/</span> Branches & PRs`;
+                    renderGit(viewport);
+                    break;
+                case 'pipeline':
+                    titleEl.innerHTML = `DevOps <span class="text-white mx-2">/</span> Pipeline Ativa`;
+                    renderPipeline(viewport);
+                    break;
+            }
+            lucide.createIcons();
+        };
+
+        // 1. Dashboard Module
+        const renderDashboard = (container) => {
+            const myMetrics = teamData.find(u => u.uid === currentUser.uid)?.metrics || { tcc: 120, commits: 45, tasks: 12, uptime: 94 };
+            
+            container.innerHTML = `
+                <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                    <div class="lg:col-span-4 flex items-end justify-between mb-2">
+                        <div>
+                            <h2 class="text-2xl font-bold tracking-tight">Painel de Performance</h2>
+                            <p class="text-zinc-500 text-xs mt-1">Dados de produtividade sincronizados em tempo real.</p>
+                        </div>
+                        <div class="flex gap-2">
+                            <span class="px-3 py-1 bg-cyan-500/10 text-cyan-500 rounded-full text-[10px] font-bold border border-cyan-500/20">LIVE METRICS</span>
+                        </div>
+                    </div>
+
+                    <!-- Cards Individuais -->
+                    <div class="glass-panel p-6 rounded-2xl border-l-4 border-cyan-500">
+                        <div class="flex justify-between items-start mb-4">
+                            <p class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">TCC Acumulado</p>
+                            <i data-lucide="clock" class="w-4 h-4 text-cyan-500"></i>
+                        </div>
+                        <h3 class="text-3xl font-mono font-bold">${myMetrics.tcc}<span class="text-sm text-zinc-500 ml-1">hrs</span></h3>
+                        <p class="text-[10px] text-emerald-500 mt-2 flex items-center gap-1"><i data-lucide="trending-up" class="w-3 h-3"></i> +12% vs mês anterior</p>
+                    </div>
+
+                    <div class="glass-panel p-6 rounded-2xl border-l-4 border-purple-500">
+                        <div class="flex justify-between items-start mb-4">
+                            <p class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Commits (Mês)</p>
+                            <i data-lucide="git-commit" class="w-4 h-4 text-purple-500"></i>
+                        </div>
+                        <h3 class="text-3xl font-mono font-bold">${myMetrics.commits}</h3>
+                        <p class="text-[10px] text-zinc-500 mt-2 font-mono">Avg: 1.4/day</p>
+                    </div>
+
+                    <div class="glass-panel p-6 rounded-2xl border-l-4 border-emerald-500">
+                        <div class="flex justify-between items-start mb-4">
+                            <p class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Tasks Concluídas</p>
+                            <i data-lucide="check-circle" class="w-4 h-4 text-emerald-500"></i>
+                        </div>
+                        <h3 class="text-3xl font-mono font-bold">${myMetrics.tasks}</h3>
+                        <div class="w-full bg-zinc-800 h-1 rounded-full mt-4 overflow-hidden">
+                            <div class="bg-emerald-500 h-full" style="width: 80%"></div>
+                        </div>
+                    </div>
+
+                    <div class="glass-panel p-6 rounded-2xl border-l-4 border-amber-500">
+                        <div class="flex justify-between items-start mb-4">
+                            <p class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Turno Ativo</p>
+                            <i data-lucide="timer" class="w-4 h-4 text-amber-500"></i>
+                        </div>
+                        <h3 class="text-3xl font-mono font-bold">${myMetrics.uptime}%</h3>
+                        <p class="text-[10px] text-zinc-500 mt-2">Disponibilidade Core</p>
+                    </div>
+
+                    <!-- Coletivo -->
+                    <div class="lg:col-span-3 glass-panel p-6 rounded-2xl min-h-[300px]">
+                        <div class="flex items-center justify-between mb-6">
+                            <h4 class="font-bold">Produtividade da Equipa (7d)</h4>
+                            <select class="bg-transparent border-none text-[10px] font-bold uppercase text-zinc-500 outline-none cursor-pointer">
+                                <option>Última Semana</option>
+                                <option>Último Mês</option>
+                            </select>
+                        </div>
+                        <div class="flex items-end gap-3 h-48">
+                            ${[40, 65, 30, 85, 45, 90, 70].map((h, i) => `
+                                <div class="flex-1 flex flex-col items-center gap-2 group cursor-help">
+                                    <div class="w-full bg-zinc-800 rounded-t-lg relative overflow-hidden h-full">
+                                        <div class="absolute bottom-0 left-0 w-full bg-cyan-500/40 group-hover:bg-cyan-500 transition-all" style="height: ${h}%"></div>
+                                    </div>
+                                    <span class="text-[8px] font-mono text-zinc-600">DIA 0${i+1}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+
+                    <div class="glass-panel p-6 rounded-2xl flex flex-col">
+                        <h4 class="font-bold mb-4">Média Global</h4>
+                        <div class="flex-1 flex flex-col justify-center items-center text-center">
+                            <div class="relative w-24 h-24 flex items-center justify-center">
+                                <svg class="w-full h-full transform -rotate-90">
+                                    <circle cx="48" cy="48" r="40" stroke="currentColor" stroke-width="8" fill="transparent" class="text-zinc-800" />
+                                    <circle cx="48" cy="48" r="40" stroke="currentColor" stroke-width="8" fill="transparent" class="text-cyan-500" stroke-dasharray="251.2" stroke-dashoffset="60" />
+                                </svg>
+                                <span class="absolute font-mono font-bold text-xl">76%</span>
+                            </div>
+                            <p class="text-[10px] text-zinc-500 mt-4 leading-relaxed">A equipa está 12% acima da meta semanal estabelecida.</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+        };
+
+        // 2. Chat Module
+        let selectedChatUserId = null;
+        const renderChat = (container) => {
+            container.innerHTML = `
+                <div class="w-80 border-r border-zinc-900 flex flex-col bg-black/40">
+                    <div class="p-6 border-b border-zinc-900">
+                        <div class="relative">
+                            <i data-lucide="search" class="absolute left-3 top-2.5 w-3.5 h-3.5 text-zinc-500"></i>
+                            <input type="text" placeholder="Procurar colega..." class="w-full bg-zinc-900 border-none rounded-xl py-2 pl-9 pr-4 text-xs focus:ring-1 focus:ring-cyan-500 outline-none">
+                        </div>
+                    </div>
+                    <div id="contacts-list" class="flex-1 overflow-y-auto custom-scrollbar">
+                        <!-- Contactos Dinâmicos -->
+                    </div>
+                </div>
+                <div id="chat-window" class="flex-1 flex flex-col bg-[#050505] relative">
+                    <div class="flex-1 flex flex-col items-center justify-center opacity-20">
+                        <i data-lucide="message-square" class="w-16 h-16 mb-4"></i>
+                        <p class="text-[10px] font-mono uppercase tracking-[0.3em]">Selecione uma conversa para iniciar</p>
+                    </div>
+                </div>
+            `;
+            updateContacts();
+        };
+
+        const updateContacts = () => {
+            const list = document.getElementById('contacts-list');
+            if (!list) return;
+            list.innerHTML = teamData.filter(u => u.uid !== currentUser.uid).map(u => `
+                <div onclick="window.openChat('${u.uid}')" class="p-4 flex items-center gap-3 hover:bg-white/5 cursor-pointer border-b border-zinc-900/50 transition-all ${selectedChatUserId === u.uid ? 'bg-cyan-500/5' : ''}">
+                    <div class="relative">
+                        <div class="w-10 h-10 rounded-full bg-zinc-800 flex items-center justify-center font-bold text-xs uppercase border border-zinc-700">${u.displayName[0]}</div>
+                        <div class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 border-2 border-black rounded-full"></div>
+                    </div>
+                    <div class="flex-1 truncate">
+                        <p class="font-bold text-[11px]">${u.displayName}</p>
+                        <p class="text-[10px] text-zinc-500 truncate">Clique para enviar mensagem...</p>
+                    </div>
+                </div>
+            `).join('');
+        };
+
+        window.openChat = (targetUid) => {
+            selectedChatUserId = targetUid;
+            const targetUser = teamData.find(u => u.uid === targetUid);
+            const chatId = [currentUser.uid, targetUid].sort().join('_');
+            const chatWindow = document.getElementById('chat-window');
+            
+            chatWindow.innerHTML = `
+                <div class="h-16 border-b border-zinc-900 px-6 flex items-center justify-between bg-black/40 backdrop-blur-md">
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-full bg-zinc-800 flex items-center justify-center font-bold text-xs border border-zinc-700">${targetUser.displayName[0]}</div>
+                        <div>
+                            <p class="font-bold text-[11px]">${targetUser.displayName}</p>
+                            <p class="text-[9px] text-emerald-500 font-mono">ONLINE AGORA</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-2">
+                        <button class="p-2 glass-btn rounded-lg"><i data-lucide="phone" class="w-3.5 h-3.5"></i></button>
+                        <button class="p-2 glass-btn rounded-lg"><i data-lucide="video" class="w-3.5 h-3.5"></i></button>
+                    </div>
+                </div>
+                <div id="msg-container" class="flex-1 overflow-y-auto p-6 space-y-4 custom-scrollbar flex flex-col">
+                    <div class="text-center py-10 opacity-30"><p class="text-[9px] font-mono">Encriptação ponta-a-ponta LearnCodigo</p></div>
+                </div>
+                <div class="p-4 bg-zinc-900/20 border-t border-zinc-900">
+                    <form id="chat-msg-form" class="flex gap-2">
+                        <input type="text" id="chat-input" placeholder="Escreva a sua mensagem..." class="flex-1 bg-zinc-900 border-none rounded-xl px-4 py-2.5 text-xs focus:ring-1 focus:ring-cyan-500 outline-none">
+                        <button type="submit" class="bg-cyan-500 text-black px-4 rounded-xl font-bold text-xs hover:bg-cyan-400 transition-all"><i data-lucide="send" class="w-4 h-4"></i></button>
+                    </form>
+                </div>
+            `;
+            lucide.createIcons();
+            updateContacts(); // Refresh selection visual
+
+            const msgRef = collection(db, 'artifacts', appId, 'public', 'data', 'private_chats', chatId, 'messages');
+            const q = query(msgRef, orderBy('timestamp', 'asc'), limit(50));
+            
+            onSnapshot(q, (snapshot) => {
+                const container = document.getElementById('msg-container');
+                if (!container) return;
+                container.innerHTML = snapshot.docs.map(doc => {
+                    const m = doc.data();
+                    const isMe = m.sender === currentUser.uid;
+                    const time = m.timestamp?.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) || '--:--';
+                    return `
+                        <div class="flex ${isMe ? 'justify-end' : 'justify-start'} animate-in fade-in slide-in-from-bottom-2 duration-300">
+                            <div class="max-w-[75%] p-3 ${isMe ? 'chat-bubble-me' : 'chat-bubble-them'}">
+                                <p class="text-[11px] leading-relaxed">${m.text}</p>
+                                <p class="text-[8px] mt-1 opacity-50 text-right">${time}</p>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+                container.scrollTop = container.scrollHeight;
+            });
+
+            document.getElementById('chat-msg-form').onsubmit = async (e) => {
+                e.preventDefault();
+                const input = document.getElementById('chat-input');
+                const text = input.value.trim();
+                if (!text) return;
+                await addDoc(msgRef, { sender: currentUser.uid, text, timestamp: serverTimestamp() });
+                input.value = '';
+            };
+        };
+
+        // 3. Git & Branches Module
+        const renderGit = (container) => {
+            container.innerHTML = `
+                <div class="max-w-4xl mx-auto space-y-8 animate-enter">
+                    <div class="flex items-center justify-between">
+                        <h2 class="text-xl font-bold flex items-center gap-3">
+                            <i data-lucide="git-pull-request" class="text-cyan-500"></i>
+                            Pull Requests Ativos
+                        </h2>
+                        <button class="bg-white/5 border border-white/10 px-4 py-2 rounded-lg text-xs font-bold hover:bg-white/10 transition-all">Ver Histórico</button>
+                    </div>
+
+                    <div id="pr-list" class="space-y-4">
+                        <!-- PRs Dinâmicos -->
+                    </div>
+                </div>
+            `;
+            updateGitList();
+        };
+
+        const updateGitList = () => {
+            const list = document.getElementById('pr-list');
+            if (!list) return;
+
+            const q = query(collection(db, 'artifacts', appId, 'public', 'data', 'pull_requests'), orderBy('timestamp', 'desc'));
+            onSnapshot(q, (snap) => {
+                if (snap.empty) {
+                    list.innerHTML = `<div class="p-20 glass-panel rounded-2xl text-center opacity-40"><p class="text-xs font-mono uppercase">Sem Pull Requests pendentes</p></div>`;
+                    return;
                 }
+                list.innerHTML = snap.docs.map(docSnap => {
+                    const pr = docSnap.data();
+                    const id = docSnap.id;
+                    const statusColors = { pending: 'text-amber-500 bg-amber-500/10', approved: 'text-emerald-500 bg-emerald-500/10', merged: 'text-cyan-500 bg-cyan-500/10' };
+                    
+                    return `
+                        <div class="glass-panel p-5 rounded-2xl hover:border-zinc-700 transition-all group">
+                            <div class="flex items-start justify-between">
+                                <div class="flex items-start gap-4">
+                                    <div class="mt-1 w-8 h-8 rounded-lg bg-zinc-900 flex items-center justify-center border border-zinc-800">
+                                        <i data-lucide="git-merge" class="w-4 h-4 text-zinc-500"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-bold text-sm mb-1">${pr.title}</h4>
+                                        <div class="flex items-center gap-3 text-[10px] text-zinc-500 font-mono">
+                                            <span class="px-2 py-0.5 rounded-full ${statusColors[pr.status] || ''} font-bold uppercase">${pr.status}</span>
+                                            <span>${pr.branch} <i data-lucide="arrow-right" class="w-2 h-2 inline"></i> main</span>
+                                            <span>BY: ${pr.author}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="flex gap-2">
+                                    ${pr.status === 'pending' ? `
+                                        <button onclick="window.updatePR('${id}', 'approved')" class="px-3 py-1.5 bg-emerald-600/20 text-emerald-500 rounded-lg text-[10px] font-bold hover:bg-emerald-600 hover:text-white transition-all">APPROVE</button>
+                                    ` : ''}
+                                    ${pr.status === 'approved' ? `
+                                        <button onclick="window.updatePR('${id}', 'merged')" class="px-3 py-1.5 bg-cyan-500 text-black rounded-lg text-[10px] font-bold hover:bg-cyan-400 transition-all">MERGE</button>
+                                    ` : ''}
+                                    <button class="p-2 glass-btn rounded-lg opacity-0 group-hover:opacity-100"><i data-lucide="external-link" class="w-3.5 h-3.5"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+                lucide.createIcons();
             });
         };
 
-        // --- Voice Logic ---
-        window.joinVoice = async (roomId) => {
-            if (!currentUser) return;
-            const userRef = doc(db, 'artifacts', appId, 'public', 'data', 'team', currentUser.uid);
-            
-            // Se já estiver na sala, sai (toggle)
-            const currentData = teamData.find(u => u.uid === currentUser.uid);
-            const newRoom = currentData?.currentRoom === roomId ? null : roomId;
-            
-            await updateDoc(userRef, { currentRoom: newRoom });
+        window.updatePR = async (id, status) => {
+            const prRef = doc(db, 'artifacts', appId, 'public', 'data', 'pull_requests', id);
+            await updateDoc(prRef, { status });
         };
 
-        const renderVoiceRooms = () => {
-            const container = document.getElementById('voice-rooms');
+        // 4. Pipeline Module
+        const renderPipeline = (container) => {
+            container.innerHTML = `
+                <div class="max-w-4xl mx-auto space-y-8 animate-enter">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="glass-panel p-5 rounded-2xl">
+                            <p class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-4">Build Status</p>
+                            <div class="flex items-center gap-3">
+                                <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+                                <span class="font-bold text-lg">SUCCESSFUL</span>
+                            </div>
+                        </div>
+                        <div class="glass-panel p-5 rounded-2xl">
+                            <p class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-4">Avg. Duration</p>
+                            <div class="flex items-center gap-3">
+                                <i data-lucide="clock" class="w-5 h-5 text-zinc-600"></i>
+                                <span class="font-bold text-lg">2m 14s</span>
+                            </div>
+                        </div>
+                        <div class="glass-panel p-5 rounded-2xl">
+                            <p class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-4">Coverage</p>
+                            <div class="flex items-center gap-3">
+                                <i data-lucide="shield" class="w-5 h-5 text-cyan-500"></i>
+                                <span class="font-bold text-lg">94.2%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="glass-panel rounded-2xl overflow-hidden">
+                        <div class="p-6 border-b border-zinc-900 flex justify-between items-center">
+                            <h4 class="font-bold">Timeline de Deployments</h4>
+                            <span class="text-[10px] text-zinc-500 font-mono">LIVE LOGS</span>
+                        </div>
+                        <div id="pipeline-timeline" class="p-6 space-y-6">
+                            <!-- Timelines dinâmicas -->
+                        </div>
+                    </div>
+                </div>
+            `;
+            updatePipelineTimeline();
+        };
+
+        const updatePipelineTimeline = () => {
+            const container = document.getElementById('pipeline-timeline');
+            if (!container) return;
+            
+            const q = query(collection(db, 'artifacts', appId, 'public', 'data', 'pipeline_logs'), orderBy('timestamp', 'desc'), limit(10));
+            onSnapshot(q, (snap) => {
+                if (snap.empty) {
+                    container.innerHTML = `<p class="text-center text-[10px] text-zinc-600 uppercase font-mono py-10">A aguardar eventos...</p>`;
+                    return;
+                }
+                container.innerHTML = snap.docs.map(doc => {
+                    const log = doc.data();
+                    const time = log.timestamp?.toDate().toLocaleTimeString() || 'Agora';
+                    return `
+                        <div class="flex gap-4 relative">
+                            <div class="w-px h-full bg-zinc-800 absolute left-[11px] top-6"></div>
+                            <div class="w-[22px] h-[22px] rounded-full bg-zinc-900 border-2 border-cyan-500/50 flex items-center justify-center shrink-0 z-10">
+                                <div class="w-1.5 h-1.5 bg-cyan-500 rounded-full"></div>
+                            </div>
+                            <div class="flex-1 pb-4">
+                                <div class="flex justify-between items-start">
+                                    <p class="text-xs font-bold">${log.message}</p>
+                                    <span class="text-[9px] font-mono text-zinc-600">${time}</span>
+                                </div>
+                                <p class="text-[10px] text-zinc-500 mt-1 font-mono">${log.details}</p>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            });
+        };
+
+        // --- Módulo de Voz ---
+        window.requestJoinVoice = async (room) => {
+            if (!currentUser) return;
+            const me = teamData.find(u => u.uid === currentUser.uid);
+            
+            // Toggle
+            const newRoom = me.currentRoom === room ? null : room;
+            await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'team', currentUser.uid), {
+                currentRoom: newRoom,
+                voiceStatus: newRoom ? 'active' : 'idle'
+            });
+        };
+
+        const updateVoiceUI = () => {
+            const container = document.getElementById('voice-channels-list');
             if (!container) return;
 
-            container.innerHTML = VOICE_ROOMS.map(room => {
-                const usersInRoom = teamData.filter(u => u.currentRoom === room);
-                const isMeInRoom = teamData.find(u => u.uid === currentUser?.uid)?.currentRoom === room;
-
+            container.innerHTML = VOICE_CHANNELS.map(channel => {
+                const usersInRoom = teamData.filter(u => u.currentRoom === channel);
+                const isMeHere = teamData.find(u => u.uid === currentUser?.uid)?.currentRoom === channel;
+                
                 return `
-                    <div class="mb-1">
-                        <button onclick="window.joinVoice('${room}')" 
-                                class="w-full text-left px-3 py-2 text-xs rounded-lg flex items-center justify-between transition-all group ${isMeInRoom ? 'bg-cyan-500/10 text-cyan-500 font-bold' : 'text-zinc-500 hover:bg-white/5'}">
+                    <div class="mb-2">
+                        <button onclick="window.requestJoinVoice('${channel}')" class="w-full flex items-center justify-between px-3 py-1.5 rounded-lg hover:bg-white/5 transition-all group ${isMeHere ? 'text-cyan-500 font-bold' : ''}">
                             <div class="flex items-center gap-2">
-                                <i data-lucide="volume-2" class="w-3.5 h-3.5"></i>
-                                <span>${room}</span>
+                                <i data-lucide="${isMeHere ? 'mic' : 'mic-off'}" class="w-3.5 h-3.5"></i>
+                                <span class="text-[11px]">${channel}</span>
                             </div>
-                            <i data-lucide="log-in" class="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity"></i>
+                            <i data-lucide="plus" class="w-3 h-3 opacity-0 group-hover:opacity-100 transition-all"></i>
                         </button>
-                        <div class="pl-8 space-y-1 mt-1">
+                        <div class="ml-7 space-y-1 mt-1">
                             ${usersInRoom.map(u => `
-                                <div class="flex items-center gap-2 py-0.5 animate-enter">
-                                    <div class="w-4 h-4 rounded-full bg-zinc-800 border border-cyan-500/30 flex items-center justify-center text-[8px] font-black voice-user-tag">
-                                        ${u.displayName.slice(0,1)}
+                                <div class="flex items-center gap-2 py-0.5 animate-in slide-in-from-left-2">
+                                    <div class="w-4 h-4 rounded-full bg-zinc-800 border border-cyan-500/20 flex items-center justify-center text-[7px] font-bold ${u.voiceStatus === 'active' ? 'voice-active border-cyan-500' : ''}">
+                                        ${u.displayName[0]}
                                     </div>
-                                    <span class="text-[10px] text-zinc-400 font-medium">${u.displayName}</span>
+                                    <span class="text-[10px] text-zinc-500">${u.displayName}</span>
                                 </div>
                             `).join('')}
                         </div>
@@ -237,217 +606,83 @@
             lucide.createIcons();
         };
 
-        // --- Dashboards ---
-        const renderDashboard = () => {
-            const viewport = document.getElementById('app-viewport');
-            const individual = analytics.individual[currentUser?.uid] || { tccHours: 128.5, commits: 14, tasks: 42 };
+        // --- Inicialização Central ---
+        const setupPersistence = async (user) => {
+            currentUser = user;
+            const userRef = doc(db, 'artifacts', appId, 'public', 'data', 'team', user.uid);
             
-            viewport.innerHTML = `
-                <div class="animate-enter">
-                    <div class="flex items-center justify-between mb-8">
-                        <div>
-                            <h3 class="text-2xl font-bold tracking-tight">Painel de Controlo</h3>
-                            <p class="text-zinc-500 text-xs mt-1">Monitorização de performance em tempo real.</p>
-                        </div>
-                    </div>
+            // Dados Mock de Métricas se não existirem
+            await setDoc(userRef, {
+                uid: user.uid,
+                displayName: `Dev_${user.uid.slice(0, 4).toUpperCase()}`,
+                lastActive: serverTimestamp(),
+                metrics: {
+                    tcc: Math.floor(Math.random() * 200) + 50,
+                    commits: Math.floor(Math.random() * 80) + 10,
+                    tasks: Math.floor(Math.random() * 20),
+                    uptime: 90 + Math.floor(Math.random() * 10)
+                }
+            }, { merge: true });
 
-                    <div id="dashboard-content" class="grid grid-cols-1 md:grid-cols-4 gap-6">
-                        <div class="glass-panel p-6 rounded-2xl flex flex-col gap-4 border-l-4 border-l-cyan-500">
-                            <div class="flex items-center justify-between">
-                                <span class="text-[10px] font-bold uppercase text-zinc-500 tracking-widest">Tempo TCC</span>
-                                <i data-lucide="clock" class="w-4 h-4 text-cyan-500"></i>
-                            </div>
-                            <h4 class="text-3xl font-mono font-bold">${individual.tccHours}<span class="text-sm ml-1 text-zinc-500">hrs</span></h4>
-                        </div>
-                        <div class="glass-panel p-6 rounded-2xl flex flex-col gap-4">
-                            <div class="flex items-center justify-between">
-                                <span class="text-[10px] font-bold uppercase text-zinc-500 tracking-widest">Commits</span>
-                                <i data-lucide="git-commit" class="w-4 h-4 text-purple-500"></i>
-                            </div>
-                            <h4 class="text-3xl font-mono font-bold">${individual.commits}</h4>
-                        </div>
-                        <div class="glass-panel p-6 rounded-2xl flex flex-col gap-4">
-                            <div class="flex items-center justify-between">
-                                <span class="text-[10px] font-bold uppercase text-zinc-500 tracking-widest">Tarefas</span>
-                                <i data-lucide="check-circle" class="w-4 h-4 text-emerald-500"></i>
-                            </div>
-                            <h4 class="text-3xl font-mono font-bold">${individual.tasks}</h4>
-                        </div>
-                        <div class="glass-panel p-6 rounded-2xl flex flex-col gap-4">
-                            <div class="flex items-center justify-between">
-                                <span class="text-[10px] font-bold uppercase text-zinc-500 tracking-widest">Sessão</span>
-                                <i data-lucide="timer" class="w-4 h-4 text-amber-500"></i>
-                            </div>
-                            <h4 class="text-3xl font-mono font-bold">Ativa</h4>
-                        </div>
-                    </div>
-                </div>
-            `;
-            lucide.createIcons();
-        };
-
-        // --- Chat ---
-        const renderChat = () => {
-            const viewport = document.getElementById('app-viewport');
-            viewport.classList.add('p-0');
-            viewport.innerHTML = `
-                <div class="flex h-full animate-enter">
-                    <div class="w-80 border-r border-zinc-900 bg-black/40 flex flex-col">
-                        <div class="p-4 border-b border-zinc-900">
-                            <input type="text" placeholder="Procurar membro..." class="w-full bg-zinc-900 border-none rounded-xl py-2 px-4 text-xs">
-                        </div>
-                        <div id="contact-list" class="flex-1 overflow-y-auto custom-scrollbar"></div>
-                    </div>
-                    <div id="chat-window" class="flex-1 flex flex-col bg-[#050505]">
-                        <div class="flex-1 flex flex-col items-center justify-center opacity-20">
-                            <i data-lucide="message-circle" class="w-16 h-16 mb-4"></i>
-                            <p class="text-xs uppercase tracking-widest font-black">Seleciona um contacto para iniciar</p>
-                        </div>
-                    </div>
-                </div>
-            `;
-            renderContacts();
-            lucide.createIcons();
-        };
-
-        const renderContacts = () => {
-            const container = document.getElementById('contact-list');
-            if (!container) return;
-            container.innerHTML = teamData.filter(u => u.uid !== currentUser?.uid).map(u => `
-                <div onclick="window.openPrivateChat('${u.uid}', '${u.displayName}')" class="p-4 flex items-center gap-3 hover:bg-white/5 cursor-pointer border-b border-zinc-900 transition-colors">
-                    <div class="w-11 h-11 rounded-full bg-zinc-800 flex items-center justify-center font-bold text-sm uppercase border border-zinc-700">${u.displayName.slice(0,1)}</div>
-                    <div class="flex-1 truncate">
-                        <p class="font-bold text-xs">${u.displayName}</p>
-                        <p class="text-[10px] text-zinc-500">${u.currentRoom ? 'Em canal de voz' : 'Online'}</p>
-                    </div>
-                </div>
-            `).join('');
-        };
-
-        window.openPrivateChat = (targetId, name) => {
-            selectedChatId = [currentUser.uid, targetId].sort().join('_');
-            const windowEl = document.getElementById('chat-window');
-            windowEl.innerHTML = `
-                <div class="h-16 border-b border-zinc-900 px-6 flex items-center justify-between bg-black/20">
-                    <div class="flex items-center gap-3">
-                        <div class="w-9 h-9 rounded-full bg-zinc-800 flex items-center justify-center font-bold text-xs">${name.slice(0,1)}</div>
-                        <p class="text-xs font-bold">${name}</p>
-                    </div>
-                </div>
-                <div id="messages-container" class="flex-1 overflow-y-auto p-6 space-y-4 custom-scrollbar flex flex-col"></div>
-                <form id="chat-form" class="p-4 bg-zinc-900/30 border-t border-zinc-900 flex gap-4">
-                    <input type="text" id="msg-input" placeholder="Escreve uma mensagem..." class="flex-1 bg-zinc-900 border-none rounded-xl px-4 py-2 text-sm">
-                    <button type="submit" class="bg-cyan-500 text-black p-2 rounded-xl"><i data-lucide="send" class="w-4 h-4"></i></button>
-                </form>
-            `;
-            lucide.createIcons();
-            
-            const msgRef = collection(db, 'artifacts', appId, 'public', 'data', 'private_chats', selectedChatId, 'messages');
-            const q = query(msgRef, orderBy('timestamp', 'asc'), limit(50));
-            onSnapshot(q, (snapshot) => {
-                const container = document.getElementById('messages-container');
-                if (!container) return;
-                container.innerHTML = snapshot.docs.map(doc => {
-                    const data = doc.data();
-                    const isMe = data.sender === currentUser.uid;
-                    return `
-                        <div class="flex ${isMe ? 'justify-end' : 'justify-start'}">
-                            <div class="max-w-[70%] p-3 ${isMe ? 'chat-bubble-me' : 'chat-bubble-them'}">
-                                <p class="text-[11px]">${data.text}</p>
-                            </div>
-                        </div>
-                    `;
-                }).join('');
-                container.scrollTop = container.scrollHeight;
-            });
-
-            document.getElementById('chat-form').onsubmit = async (e) => {
-                e.preventDefault();
-                const input = document.getElementById('msg-input');
-                const text = input.value.trim();
-                if (!text) return;
-                await addDoc(msgRef, { sender: currentUser.uid, text, timestamp: serverTimestamp() });
-                input.value = '';
-            };
-        };
-
-        // --- Renderização Central ---
-        const renderPage = () => {
-            const viewport = document.getElementById('app-viewport');
-            if (!viewport) return;
-            viewport.classList.remove('p-0');
-            const titleEl = document.getElementById('header-title');
-
-            switch(activePage) {
-                case 'dashboard':
-                    titleEl.innerHTML = `<h2 class="text-sm font-bold uppercase tracking-widest text-zinc-400">Workspace / <span class="text-white">Dashboards</span></h2>`;
-                    renderDashboard();
-                    break;
-                case 'chat':
-                    titleEl.innerHTML = `<h2 class="text-sm font-bold uppercase tracking-widest text-zinc-400">Comunicação / <span class="text-white">Chat</span></h2>`;
-                    renderChat();
-                    break;
-                case 'pipeline':
-                    titleEl.innerHTML = `<h2 class="text-sm font-bold uppercase tracking-widest text-zinc-400">DevOps / <span class="text-white">Pipeline</span></h2>`;
-                    viewport.innerHTML = `<div class="p-20 text-center opacity-40 animate-enter"><i data-lucide="activity" class="w-12 h-12 mx-auto mb-4"></i><p class="font-mono">Monitorização de Pipeline Ativa</p></div>`;
-                    lucide.createIcons();
-                    break;
-                case 'branches':
-                    titleEl.innerHTML = `<h2 class="text-sm font-bold uppercase tracking-widest text-zinc-400">Git / <span class="text-white">Pull Requests</span></h2>`;
-                    viewport.innerHTML = `<div class="p-20 text-center opacity-40 animate-enter"><i data-lucide="git-branch" class="w-12 h-12 mx-auto mb-4"></i><p class="font-mono">Sem Pull Requests pendentes</p></div>`;
-                    lucide.createIcons();
-                    break;
-            }
-        };
-
-        // --- Inicialização ---
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                currentUser = user;
-                const userRef = doc(db, 'artifacts', appId, 'public', 'data', 'team', user.uid);
-                await setDoc(userRef, {
-                    uid: user.uid,
-                    displayName: `Dev_${user.uid.slice(0, 5)}`,
-                    lastActive: serverTimestamp()
-                }, { merge: true });
-
-                document.getElementById('user-display-name').textContent = `Dev_${user.uid.slice(0, 5)}`;
-                document.getElementById('user-avatar').textContent = user.uid.slice(0, 1);
+            // Listeners em tempo real
+            onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'team'), (snap) => {
+                teamData = snap.docs.map(d => d.data());
                 
-                // Monitorização em Tempo Real da Equipa (Voz e Presença)
-                onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'team'), (snap) => {
-                    teamData = snap.docs.map(d => d.data());
-                    
-                    // Atualizar avatares no cabeçalho
-                    const avatarList = document.getElementById('active-team-list');
-                    if (avatarList) {
-                        avatarList.innerHTML = teamData.slice(0, 5).map(u => `
-                            <div class="w-7 h-7 rounded-full border-2 border-zinc-950 bg-zinc-900 flex items-center justify-center text-[9px] font-bold uppercase">
-                                ${u.displayName.slice(0, 1)}
-                            </div>
-                        `).join('');
+                // Update Topbar Avatars
+                const onlineBar = document.getElementById('online-team');
+                if (onlineBar) {
+                    onlineBar.innerHTML = teamData.slice(0, 5).map(u => `
+                        <div class="w-7 h-7 rounded-full border-2 border-zinc-950 bg-zinc-900 flex items-center justify-center text-[9px] font-bold uppercase" title="${u.displayName}">${u.displayName[0]}</div>
+                    `).join('') + (teamData.length > 5 ? `<div class="w-7 h-7 rounded-full border-2 border-zinc-950 bg-zinc-800 flex items-center justify-center text-[9px] font-bold">+${teamData.length - 5}</div>` : '');
+                }
+
+                // Update Profile Footer
+                const me = teamData.find(u => u.uid === user.uid);
+                document.getElementById('u-name').textContent = me.displayName;
+                document.getElementById('u-avatar').textContent = me.displayName[0];
+
+                // Global Updates
+                updateVoiceUI();
+                if (activePage === 'dashboard') renderDashboard(document.getElementById('app-viewport'));
+                if (activePage === 'chat') updateContacts();
+            }, (err) => console.error("Firestore Error (Team):", err));
+
+            // Seed Mock Data se coleções estiverem vazias (First Run)
+            const prSnap = await getDoc(doc(db, 'artifacts', appId, 'public', 'data', 'pull_requests', 'seed'));
+            if (!prSnap.exists()) {
+                await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'pull_requests', 'pr_01'), {
+                    title: "feat: Refactoring communication module",
+                    author: "Arquitecto_OS",
+                    branch: "feature/voice-ai",
+                    status: "pending",
+                    timestamp: serverTimestamp()
+                });
+                await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'pipeline_logs'), {
+                    message: "Deploy to production successful",
+                    details: "Revision: a8f2d9e | Env: PROD",
+                    timestamp: serverTimestamp()
+                });
+            }
+
+            window.router.navigate('dashboard');
+        };
+
+        // Auth
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                setupPersistence(user);
+            } else {
+                const initAuth = async () => {
+                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                        await signInWithCustomToken(auth, __initial_auth_token);
+                    } else {
+                        await signInAnonymously(auth);
                     }
-
-                    // Atualizar Canais de Voz
-                    renderVoiceRooms();
-                    
-                    // Se estiver no chat, atualizar contactos
-                    if (activePage === 'chat') renderContacts();
-                }, (err) => console.error("Erro Firestore:", err));
-
-                window.router.navigate('dashboard');
+                };
+                initAuth().catch(console.error);
             }
         });
 
-        const initAuth = async () => {
-            if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                await signInWithCustomToken(auth, __initial_auth_token);
-            } else {
-                await signInAnonymously(auth);
-            }
-        };
-
-        initAuth().catch(console.error);
     </script>
 </body>
 </html>

@@ -52,11 +52,17 @@
             display: inline-block;
             stroke-width: 2;
         }
+
+        .bar-grow { animation: barGrow 1s ease-out forwards; transform-origin: bottom; }
+        @keyframes barGrow { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+        
+        .radar-line { stroke-dasharray: 100; stroke-dashoffset: 100; animation: dash 2s ease-out forwards; }
+        @keyframes dash { to { stroke-dashoffset: 0; } }
     </style>
 </head>
 <body class="h-screen flex select-none">
 
-    <!-- SIDEBAR -->
+    <!-- SIDEBAR PRINCIPAL -->
     <aside class="w-20 bg-black border-r border-zinc-900 flex flex-col items-center py-8 gap-8 shrink-0 z-50">
         <div class="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-black shadow-lg shadow-white/10">
             <i data-lucide="shield-check" class="w-7 h-7"></i>
@@ -87,6 +93,12 @@
                     <span class="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Modo Demo Ativo</span>
                 </div>
             </div>
+            <div class="flex items-center gap-6">
+                <div class="flex flex-col items-end">
+                    <span class="text-[10px] font-black text-white tracking-widest uppercase">LearnCodigo v3.6</span>
+                    <span class="text-[8px] text-zinc-600 font-mono tracking-tighter italic">Enterprise OS Framework</span>
+                </div>
+            </div>
         </header>
 
         <!-- VIEW: CHAT -->
@@ -95,16 +107,14 @@
                 <div class="p-4 border-b border-zinc-900">
                     <h3 class="text-[10px] font-black text-zinc-600 uppercase tracking-widest">Terminais Disponíveis</h3>
                 </div>
-                <div id="contact-list" class="flex-1 overflow-y-auto custom-scrollbar p-2">
-                    <!-- Preenchido via Script -->
-                </div>
+                <div id="contact-list" class="flex-1 overflow-y-auto custom-scrollbar p-2"></div>
             </aside>
 
             <main class="flex-1 flex flex-col relative min-w-0">
                 <div id="chat-messages" class="flex-1 overflow-y-auto p-6 space-y-4 custom-scrollbar flex flex-col">
                     <div class="m-auto text-center opacity-30">
                         <i data-lucide="terminal" class="w-12 h-12 mx-auto mb-4 text-zinc-500"></i>
-                        <p class="text-sm font-medium">Aguarda seleção de canal...</p>
+                        <p class="text-sm font-medium italic">Selecione um canal para iniciar transmissão...</p>
                     </div>
                 </div>
 
@@ -120,18 +130,44 @@
         </section>
 
         <!-- VIEW: METRICS -->
-        <section id="view-metrics" class="view-layer p-10 flex-col overflow-y-auto custom-scrollbar">
-            <div class="max-w-6xl mx-auto w-full">
-                <h2 class="text-2xl font-black mb-8 italic tracking-tighter">CORE ANALYTICS</h2>
-                <div id="metrics-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <!-- Preenchido via Script -->
+        <section id="view-metrics" class="view-layer p-10 overflow-y-auto custom-scrollbar">
+            <div class="max-w-7xl mx-auto w-full">
+                <div class="flex flex-col mb-12">
+                    <h2 class="text-4xl font-black italic tracking-tighter uppercase mb-2">Enterprise Analytics</h2>
+                    <div class="flex items-center gap-3">
+                        <span class="text-zinc-500 text-[10px] font-bold uppercase tracking-[0.2em]">Monitorização de Performance em Tempo Real</span>
+                        <div class="h-px flex-1 bg-zinc-900"></div>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-1 xl:grid-cols-12 gap-8">
+                    <!-- Grelha de Agentes -->
+                    <div class="xl:col-span-8">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="metrics-grid">
+                            <!-- Preenchido via Script -->
+                        </div>
+                    </div>
+                    
+                    <!-- Painel de Análise Profunda -->
+                    <div class="xl:col-span-4 space-y-6">
+                        <div id="analysis-detail" class="glass-panel p-8 rounded-[2rem] border-zinc-800 h-fit sticky top-0 hidden">
+                            <div id="detail-content"></div>
+                        </div>
+
+                        <div id="no-selection-hint" class="glass-panel p-16 rounded-[2rem] border-dashed border-zinc-800 flex flex-col items-center justify-center text-center opacity-40">
+                            <div class="w-16 h-16 bg-zinc-900 rounded-full flex items-center justify-center mb-6">
+                                <i data-lucide="fingerprint" class="w-8 h-8 text-zinc-600"></i>
+                            </div>
+                            <p class="text-xs font-black uppercase tracking-[0.2em] leading-relaxed">Aguardando Seleção de Agente<br><span class="text-[10px] font-normal text-zinc-500 italic">Clique num card para iniciar o Deep Dive</span></p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>
     </div>
 
     <script>
-        // --- DADOS DE DEMONSTRAÇÃO (SUBSTITUINDO FIREBASE) ---
+        // --- DADOS E SIMULAÇÃO ---
         let currentChatId = null;
         const mockUser = { uid: 'USER-001', name: 'Agent_Alpha' };
         
@@ -151,12 +187,57 @@
         };
 
         const teamMetrics = [
-            { name: "Agent_Alpha", uid: "USER-001", role: "Analista Principal", activity: 94 },
-            { name: "Agent_Beta", uid: "USER-002", role: "DevOps Engineer", activity: 82 },
-            { name: "System_Core", uid: "ROOT-SYS", role: "Administrator", activity: 100 }
+            { 
+                name: "Agent_Alpha", 
+                uid: "USER-001", 
+                role: "Analista Principal", 
+                activity: 94,
+                stats: [65, 80, 45, 90, 70, 85, 94],
+                skills: { backend: 90, frontend: 75, security: 85, ops: 60 },
+                tasks: 124,
+                commits: 412,
+                uptime: "182h",
+                status: "Online"
+            },
+            { 
+                name: "Agent_Beta", 
+                uid: "USER-002", 
+                role: "DevOps Engineer", 
+                activity: 82,
+                stats: [40, 55, 70, 60, 82, 75, 82],
+                skills: { backend: 60, frontend: 40, security: 70, ops: 95 },
+                tasks: 89,
+                commits: 156,
+                uptime: "145h",
+                status: "Em Pausa"
+            },
+            { 
+                name: "Agent_Gamma", 
+                uid: "USER-003", 
+                role: "UI/UX Specialist", 
+                activity: 88,
+                stats: [75, 85, 90, 80, 70, 88, 88],
+                skills: { backend: 20, frontend: 98, security: 30, ops: 40 },
+                tasks: 210,
+                commits: 82,
+                uptime: "160h",
+                status: "Online"
+            },
+            { 
+                name: "System_Core", 
+                uid: "ROOT-SYS", 
+                role: "Administrator", 
+                activity: 100,
+                stats: [100, 100, 100, 100, 100, 100, 100],
+                skills: { backend: 100, frontend: 100, security: 100, ops: 100 },
+                tasks: "∞",
+                commits: "9k+",
+                uptime: "9999h",
+                status: "Crítico"
+            }
         ];
 
-        // --- LÓGICA DE INTERFACE ---
+        // --- LÓGICA CORE ---
         function start() {
             renderContacts();
             renderMetrics();
@@ -166,10 +247,8 @@
         window.changeTab = (tab) => {
             document.querySelectorAll('.view-layer').forEach(l => l.classList.remove('active'));
             document.querySelectorAll('.nav-link').forEach(n => n.classList.remove('active'));
-            
             document.getElementById(`view-${tab}`).classList.add('active');
             document.getElementById(`tab-${tab}`).classList.add('active');
-            
             document.getElementById('view-title').innerText = tab === 'chat' ? 'Communication Node' : 'System Metrics';
             if(window.lucide) lucide.createIcons();
         }
@@ -183,7 +262,7 @@
                     </div>
                     <div class="min-w-0">
                         <p class="text-xs font-bold text-zinc-300 truncate">${c.name}</p>
-                        <p class="text-[9px] text-zinc-600 uppercase tracking-tighter font-mono">Encrypted.v3</p>
+                        <p class="text-[9px] text-zinc-600 uppercase tracking-tighter font-mono">Protocolo.AES256</p>
                     </div>
                 </div>
             `).join('');
@@ -201,22 +280,18 @@
         function renderMessages() {
             const box = document.getElementById('chat-messages');
             const msgs = chatHistory[currentChatId] || [];
-            
-            if(msgs.length === 0) {
-                box.innerHTML = `<div class="m-auto text-zinc-800 text-[10px] font-bold uppercase tracking-widest italic">Início da transmissão segura</div>`;
-            } else {
-                box.innerHTML = msgs.map(m => {
-                    const isMe = m.uid === mockUser.uid;
-                    return `
-                        <div class="flex flex-col ${isMe ? 'items-end' : 'items-start'} animate-in fade-in slide-in-from-bottom-2 duration-300">
-                            <div class="max-w-[80%] ${isMe ? 'bg-blue-600 text-white' : 'bg-zinc-900 text-zinc-300 border border-zinc-800'} px-4 py-2 rounded-2xl ${isMe ? 'rounded-tr-none' : 'rounded-tl-none'}">
-                                <p class="text-sm leading-relaxed">${m.text}</p>
-                            </div>
-                            <span class="text-[8px] text-zinc-600 mt-1 uppercase font-bold tracking-widest">${m.sender}</span>
+            box.innerHTML = msgs.length === 0 ? `<div class="m-auto text-zinc-800 text-[10px] font-bold uppercase tracking-widest italic">Sem registos recentes neste canal</div>` : 
+            msgs.map(m => {
+                const isMe = m.uid === mockUser.uid;
+                return `
+                    <div class="flex flex-col ${isMe ? 'items-end' : 'items-start'} animate-in fade-in slide-in-from-bottom-2 duration-300">
+                        <div class="max-w-[80%] ${isMe ? 'bg-blue-600 text-white' : 'bg-zinc-900 text-zinc-300 border border-zinc-800'} px-4 py-2 rounded-2xl ${isMe ? 'rounded-tr-none' : 'rounded-tl-none'} shadow-lg shadow-black/20">
+                            <p class="text-sm leading-relaxed">${m.text}</p>
                         </div>
-                    `;
-                }).join('');
-            }
+                        <span class="text-[8px] text-zinc-600 mt-1 uppercase font-bold tracking-[0.2em]">${m.sender}</span>
+                    </div>
+                `;
+            }).join('');
             box.scrollTop = box.scrollHeight;
             if(window.lucide) lucide.createIcons();
         }
@@ -225,46 +300,122 @@
             const input = document.getElementById('msg-input');
             const text = input.value.trim();
             if(!text || !currentChatId) return;
-
-            chatHistory[currentChatId].push({
-                text: text,
-                uid: mockUser.uid,
-                sender: `ID-${mockUser.uid.split('-')[1]}`,
-            });
-
+            chatHistory[currentChatId].push({ text: text, uid: mockUser.uid, sender: `ID-${mockUser.uid.split('-')[1]}` });
             input.value = '';
             renderMessages();
         }
 
         function renderMetrics() {
             const grid = document.getElementById('metrics-grid');
-            grid.innerHTML = teamMetrics.map(u => `
-                <div class="glass-panel p-6 rounded-2xl border-zinc-800/50 hover:border-blue-500/30 transition-all group">
-                    <div class="flex justify-between items-center mb-6">
-                        <div class="px-2 py-1 rounded bg-blue-500/10 text-blue-500 text-[8px] font-black uppercase tracking-widest">${u.role}</div>
-                        <div class="w-2 h-2 rounded-full bg-emerald-500 shadow-lg shadow-emerald-500/50"></div>
+            grid.innerHTML = teamMetrics.map((u, idx) => `
+                <div onclick="showAnalysis(${idx})" class="glass-panel p-8 rounded-[1.5rem] border-zinc-800/50 hover:border-blue-500/30 transition-all group cursor-pointer active:scale-[0.98] relative overflow-hidden">
+                    <div class="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+                        <i data-lucide="activity" class="w-16 h-16"></i>
                     </div>
-                    <h3 class="text-lg font-bold text-zinc-100 group-hover:text-blue-400 transition-colors">${u.name}</h3>
-                    <p class="text-[9px] text-zinc-700 font-mono mt-1 mb-6">${u.uid}</p>
+                    <div class="flex justify-between items-start mb-8">
+                        <div>
+                            <div class="px-2 py-1 rounded-md bg-blue-500/10 text-blue-500 text-[8px] font-black uppercase tracking-widest mb-2 w-fit">${u.role}</div>
+                            <h3 class="text-xl font-black text-zinc-100 group-hover:text-blue-400 transition-colors uppercase tracking-tight">${u.name}</h3>
+                        </div>
+                        <div class="flex items-center gap-2">
+                             <span class="text-[8px] font-bold text-zinc-600 uppercase">${u.status}</span>
+                             <div class="w-2 h-2 rounded-full ${u.status === 'Online' ? 'bg-emerald-500' : (u.status === 'Crítico' ? 'bg-red-500' : 'bg-amber-500')} shadow-lg"></div>
+                        </div>
+                    </div>
                     
-                    <div class="space-y-3">
-                        <div class="flex justify-between items-end">
-                            <span class="text-[10px] font-bold text-zinc-500">FREQUÊNCIA DE SINCRONIZAÇÃO</span>
-                            <span class="text-[10px] font-mono text-zinc-300">${u.activity}%</span>
+                    <div class="grid grid-cols-2 gap-4 mb-6">
+                        <div>
+                            <p class="text-[8px] text-zinc-600 font-bold uppercase tracking-widest mb-1">Produtividade</p>
+                            <p class="text-lg font-mono font-bold text-zinc-300">${u.activity}%</p>
                         </div>
-                        <div class="w-full h-1 bg-zinc-900 rounded-full overflow-hidden">
-                            <div class="h-full bg-gradient-to-r from-blue-600 to-cyan-400 transition-all duration-1000" style="width: ${u.activity}%"></div>
+                        <div>
+                            <p class="text-[8px] text-zinc-600 font-bold uppercase tracking-widest mb-1">Commits</p>
+                            <p class="text-lg font-mono font-bold text-zinc-300">${u.commits}</p>
                         </div>
+                    </div>
+
+                    <div class="w-full h-1 bg-zinc-900 rounded-full overflow-hidden">
+                        <div class="h-full bg-gradient-to-r from-blue-600 to-indigo-400 transition-all duration-1000" style="width: ${u.activity}%"></div>
                     </div>
                 </div>
             `).join('');
+            if(window.lucide) lucide.createIcons();
         }
 
-        document.getElementById('msg-input').addEventListener('keypress', (e) => {
-            if(e.key === 'Enter') sendMsg();
-        });
+        window.showAnalysis = (index) => {
+            const user = teamMetrics[index];
+            const detailPanel = document.getElementById('analysis-detail');
+            const hint = document.getElementById('no-selection-hint');
+            const content = document.getElementById('detail-content');
 
-        // Inicializar após carregamento do DOM
+            hint.classList.add('hidden');
+            detailPanel.classList.remove('hidden');
+
+            content.innerHTML = `
+                <div class="animate-in fade-in slide-in-from-right-8 duration-500">
+                    <div class="flex flex-col items-center text-center mb-10">
+                        <div class="w-20 h-20 rounded-3xl bg-gradient-to-br from-blue-600 to-indigo-800 flex items-center justify-center font-black text-3xl mb-4 shadow-xl shadow-blue-900/20">
+                            ${user.name.charAt(0)}
+                        </div>
+                        <h4 class="font-black text-2xl tracking-tighter uppercase mb-1">${user.name}</h4>
+                        <p class="text-[10px] text-zinc-500 uppercase font-black tracking-[0.3em]">${user.role}</p>
+                    </div>
+
+                    <div class="space-y-8">
+                        <!-- Skills Radar -->
+                        <div>
+                            <p class="text-[10px] text-zinc-400 font-black uppercase tracking-widest mb-6 flex items-center gap-2">
+                                <i data-lucide="cpu" class="w-3 h-3 text-blue-500"></i> Competências Técnicas
+                            </p>
+                            <div class="space-y-4">
+                                ${Object.entries(user.skills).map(([skill, val]) => `
+                                    <div class="space-y-1">
+                                        <div class="flex justify-between text-[9px] font-bold uppercase text-zinc-500">
+                                            <span>${skill}</span>
+                                            <span class="font-mono">${val}%</span>
+                                        </div>
+                                        <div class="h-1 bg-zinc-900 rounded-full overflow-hidden">
+                                            <div class="h-full bg-zinc-600 rounded-full" style="width: ${val}%"></div>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+
+                        <!-- Mini Graph Area -->
+                        <div class="pt-6 border-t border-zinc-900">
+                            <p class="text-[10px] text-zinc-400 font-black uppercase tracking-widest mb-6">Frequência de Deploy (7D)</p>
+                            <div class="flex items-end justify-between h-24 gap-1.5">
+                                ${user.stats.map(val => `
+                                    <div class="flex-1 bg-zinc-900 rounded-t-md relative group/bar">
+                                        <div class="absolute bottom-0 w-full bg-blue-500/40 rounded-t-md bar-grow" style="height: ${val}%"></div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+
+                        <!-- Technical Stats -->
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="bg-black p-4 rounded-2xl border border-zinc-900">
+                                <p class="text-[8px] text-zinc-600 font-bold uppercase mb-1 italic">Pull Requests</p>
+                                <p class="text-xl font-mono font-bold text-white">${user.tasks}</p>
+                            </div>
+                            <div class="bg-black p-4 rounded-2xl border border-zinc-900">
+                                <p class="text-[8px] text-zinc-600 font-bold uppercase mb-1 italic">Sessão Ativa</p>
+                                <p class="text-xl font-mono font-bold text-white">${user.uptime}</p>
+                            </div>
+                        </div>
+
+                        <button onclick="window.changeTab('chat')" class="w-full mt-6 py-4 bg-white text-black rounded-xl text-[10px] font-black uppercase tracking-[0.2em] hover:bg-zinc-200 transition-all active:scale-95 shadow-lg shadow-white/5">
+                            Abrir Canal Direto
+                        </button>
+                    </div>
+                </div>
+            `;
+            if(window.lucide) lucide.createIcons();
+        }
+
+        document.getElementById('msg-input').addEventListener('keypress', (e) => { if(e.key === 'Enter') sendMsg(); });
         window.addEventListener('load', start);
     </script>
 </body>

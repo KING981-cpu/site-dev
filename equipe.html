@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="pt-pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LearnCodigo | Enterprise OS v3.5</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
+        
+        :root {
+            --bg-deep: #020203;
+            --bg-panel: #09090b;
+            --accent: #3b82f6;
+            --accent-glow: rgba(59, 130, 246, 0.4);
+            --border: rgba(255, 255, 255, 0.06);
+            --glass: rgba(255, 255, 255, 0.02);
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-deep);
+            color: #fafafa;
+            overflow: hidden;
+        }
+
+        .mono { font-family: 'JetBrains Mono', monospace; }
+
+        .glass-panel {
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+        }
+
+        .nav-link.active {
+            background: linear-gradient(135deg, var(--accent) 0%, #1d4ed8 100%);
+            color: white;
+            box-shadow: 0 0 20px var(--accent-glow);
+        }
+
+        /* Camadas de Visualização - Suporte para SPA (Single Page Application) */
+        .view-layer { display: none; height: 100%; opacity: 0; transform: translateY(10px); transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+        .view-layer.active { display: flex; opacity: 1; transform: translateY(0); }
+
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #27272a; border-radius: 10px; }
+
+        .chat-item.active {
+            background: rgba(59, 130, 246, 0.1);
+            border-right: 3px solid var(--accent);
+        }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .msg-animate { animation: fadeIn 0.3s ease-out; }
+    </style>
+</head>
+<body class="h-screen flex select-none">
+
+    <!-- SIDEBAR OPERACIONAL -->
+    <aside class="w-20 bg-[#000000] border-r border-zinc-900 flex flex-col items-center py-8 gap-8 shrink-0 z-50">
+        <div class="group cursor-pointer">
+            <div class="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-black shadow-xl group-hover:scale-105 transition-transform duration-300">
+                <i data-lucide="layers" class="w-7 h-7"></i>
+            </div>
+        </div>
+        
+        <div class="flex flex-col gap-4">
+            <button onclick="switchApp('chat')" id="btn-chat" class="nav-link active w-12 h-12 rounded-xl flex items-center justify-center text-zinc-500 hover:text-white transition-all duration-300">
+                <i data-lucide="message-square" class="w-5 h-5"></i>
+            </button>
+            <button onclick="switchApp('prod')" id="btn-prod" class="nav-link w-12 h-12 rounded-xl flex items-center justify-center text-zinc-500 hover:text-white transition-all duration-300">
+                <i data-lucide="box" class="w-5 h-5"></i>
+            </button>
+            <button onclick="switchApp('metrics')" id="btn-metrics" class="nav-link w-12 h-12 rounded-xl flex items-center justify-center text-zinc-500 hover:text-white transition-all duration-300">
+                <i data-lucide="activity" class="w-5 h-5"></i>
+            </button>
+        </div>
+
+        <div class="mt-auto flex flex-col gap-6 items-center">
+            <div id="user-avatar" class="w-12 h-12 rounded-full border-2 border-emerald-500/50 p-0.5 relative cursor-pointer">
+                <div class="w-full h-full bg-zinc-800 rounded-full flex items-center justify-center font-bold text-[10px] text-zinc-300">USR</div>
+                <div class="absolute bottom-0 right-0 w-3.5 h-3.5 bg-emerald-500 border-2 border-black rounded-full"></div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- CONTENT WRAPPER -->
+    <div class="flex-1 flex flex-col relative overflow-hidden bg-[#050506]">
+        
+        <!-- HEADER -->
+        <header class="h-16 border-b border-zinc-900 flex items-center justify-between px-8 bg-zinc-950/50 backdrop-blur-md z-40">
+            <div class="flex items-center gap-4">
+                <span id="current-view-label" class="text-sm font-bold tracking-widest uppercase text-zinc-500">Workspace</span>
+                <div class="h-4 w-[1px] bg-zinc-800"></div>
+                <div id="active-chat-header" class="flex items-center gap-3">
+                    <span class="text-xs font-bold text-zinc-400">A selecionar canal...</span>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-4">
+                <div class="flex -space-x-2">
+                    <div class="w-7 h-7 rounded-full bg-zinc-800 border border-zinc-900"></div>
+                    <div class="w-7 h-7 rounded-full bg-zinc-700 border border-zinc-900"></div>
+                </div>
+                <button class="text-zinc-500 hover:text-white"><i data-lucide="search" class="w-5 h-5"></i></button>
+            </div>
+        </header>
+
+        <!-- APP: CHAT (Modulo de Comunicação) -->
+        <section id="app-chat" class="view-layer active overflow-hidden">
+            <aside class="w-80 border-r border-zinc-900 bg-[#070708] flex flex-col shrink-0">
+                <div class="p-4">
+                    <div class="bg-zinc-900/50 rounded-xl px-3 py-2 flex items-center gap-2 border border-zinc-800 mb-4">
+                        <i data-lucide="search" class="w-4 h-4 text-zinc-600"></i>
+                        <input type="text" placeholder="Procurar conversa..." class="bg-transparent border-none outline-none text-xs w-full text-zinc-300">
+                    </div>
+                </div>
+                <div id="chat-list" class="flex-1 overflow-y-auto custom-scrollbar"></div>
+            </aside>
+
+            <main class="flex-1 flex flex-col bg-[#050506] relative">
+                <div class="absolute inset-0 opacity-[0.03] pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]"></div>
+                <div id="chat-scroller" class="flex-1 overflow-y-auto p-6 space-y-4 custom-scrollbar relative z-10">
+                    <div class="h-full flex flex-col items-center justify-center text-zinc-600">
+                        <i data-lucide="message-circle" class="w-12 h-12 mb-4 opacity-20"></i>
+                        <p class="text-sm font-medium">Seleciona uma conversa para começar</p>
+                    </div>
+                </div>
+                <div id="chat-input-container" class="p-6 bg-gradient-to-t from-[#050506] to-transparent relative z-10 hidden">
+                    <div class="max-w-4xl mx-auto glass-panel p-2 rounded-2xl flex items-end gap-2 border-zinc-800 shadow-2xl">
+                        <button class="p-3 text-zinc-500 hover:text-zinc-300"><i data-lucide="plus" class="w-5 h-5"></i></button>
+                        <textarea id="main-input" rows="1" placeholder="Escreve uma mensagem..." class="flex-1 bg-transparent border-none outline-none py-3 px-2 text-sm resize-none text-zinc-200"></textarea>
+                        <button id="btn-send" class="bg-blue-600 hover:bg-blue-500 text-white p-3 rounded-xl transition-all active:scale-95 shadow-lg shadow-blue-600/20">
+                            <i data-lucide="send" class="w-5 h-5"></i>
+                        </button>
+                    </div>
+                </div>
+            </main>
+        </section>
+
+        <!-- APP: METRICS (Modulo People Intelligence) -->
+        <section id="app-metrics" class="view-layer flex-col p-10 overflow-y-auto custom-scrollbar">
+            <div class="max-w-7xl mx-auto w-full space-y-8">
+                <div>
+                    <h2 class="text-3xl font-black">People Intelligence</h2>
+                    <p class="text-zinc-500 mt-1">Análise comportamental e técnica da equipa em tempo real.</p>
+                </div>
+
+                <div id="people-analytics-grid" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Conteúdo gerado via Firestore -->
+                </div>
+
+                <div class="glass-panel rounded-3xl p-8">
+                    <h3 class="font-bold mb-6 flex items-center gap-2"><i data-lucide="grid" class="w-4 h-4"></i> Commits Density Heatmap</h3>
+                    <div class="grid grid-cols-24 gap-1 h-32" id="global-heatmap"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- APP: PROD (Modulo de Produção / Git Pipeline) -->
+        <section id="app-prod" class="view-layer p-10 overflow-y-auto custom-scrollbar">
+             <div class="max-w-7xl mx-auto w-full">
+                <h2 class="text-2xl font-bold mb-6">Pipeline de Pull Requests</h2>
+                <div id="git-pr-container" class="space-y-4">
+                    <div class="glass-panel p-6 rounded-2xl flex items-center justify-between">
+                        <div class="flex items-center gap-4">
+                            <div class="w-10 h-10 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-500"><i data-lucide="git-pull-request" class="w-5 h-5"></i></div>
+                            <div>
+                                <p class="font-bold">feat: gitflow-integration-v1</p>
+                                <p class="text-xs text-zinc-500">Aberto por Sistema • Agora</p>
+                            </div>
+                        </div>
+                        <span class="text-[10px] font-bold text-emerald-500 bg-emerald-500/10 px-3 py-1 rounded-full uppercase">Estável</span>
+                    </div>
+                </div>
+             </div>
+        </section>
+    </div>
+
+    <!-- Scripts de Módulos (Simulação da Fase 2: Modularização) -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getFirestore, collection, onSnapshot, addDoc, doc, setDoc, query, orderBy, limit, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+
+        /** * CONFIGURAÇÃO E ESTADO GLOBAL
+         * Em produção, isto estaria num ficheiro de config separado.
+         */
+        const firebaseConfig = JSON.parse(__firebase_config);
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'enterprise-os-v3';
+
+        let state = {
+            user: null,
+            activeContact: null,
+            contacts: [
+                { id: 'geral', name: 'Canal Geral', type: 'channel', lastMsg: 'Bem-vindos ao sprint!', time: '10:45', unread: 0 },
+                { id: 'marco', name: 'Marco Dev', type: 'user', role: 'Backend Lead', commits: 54, impact: 92, workload: 45, time: 'Ontem', unread: 2 },
+                { id: 'sofia', name: 'Sofia Ops', type: 'user', role: 'SRE / Cloud', commits: 12, impact: 98, workload: 89, time: '11:20', unread: 0 },
+                { id: 'tiago', name: 'Tiago UX', type: 'user', role: 'Frontend Eng', commits: 41, impact: 70, workload: 30, time: '09:15', unread: 5 }
+            ]
+        };
+
+        /**
+         * FLOW DE AUTENTICAÇÃO (Segurança em Primeiro Lugar)
+         * Resolve o erro de permissões garantindo que o Auth ocorre antes de qualquer query.
+         */
+        const initAuth = async () => {
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            } catch (err) {
+                console.error("Erro Crítico de Autenticação:", err);
+            }
+        };
+
+        initAuth();
+
+        onAuthStateChanged(auth, async user => {
+            if (user) {
+                state.user = user;
+                
+                // Telemetria do Utilizador (Public Data Path)
+                try {
+                    await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'team', user.uid), {
+                        uid: user.uid,
+                        name: `Arquiteto_${user.uid.substring(0,4)}`,
+                        role: 'System Architect',
+                        commits: 7,
+                        impact: 99,
+                        workload: 20
+                    }, { merge: true });
+                } catch (e) { console.warn("Aviso: Falha na telemetria silenciosa."); }
+
+                renderChatList();
+                renderPeopleAnalytics();
+                initHeatmap();
+            }
+        });
+
+        /**
+         * LÓGICA DE NAVEGAÇÃO SPA
+         */
+        window.switchApp = (target) => {
+            document.querySelectorAll('.view-layer').forEach(l => l.classList.remove('active'));
+            document.querySelectorAll('.nav-link').forEach(n => n.classList.remove('active'));
+            
+            const activeLayer = document.getElementById(`app-${target}`);
+            const activeBtn = document.getElementById(`btn-${target}`);
+            
+            if(activeLayer) activeLayer.classList.add('active');
+            if(activeBtn) activeBtn.classList.add('active');
+            
+            document.getElementById('current-view-label').innerText = target === 'chat' ? 'Comunicação' : target === 'metrics' ? 'People Analytics' : 'Produção';
+            
+            if(target === 'metrics') renderPeopleAnalytics();
+            lucide.createIcons();
+        };
+
+        /**
+         * MÓDULO: ANALYTICS (Real-time Sync)
+         */
+        function renderPeopleAnalytics() {
+            if (!state.user) return; 
+            const grid = document.getElementById('people-analytics-grid');
+            if(!grid) return;
+
+            // Snapshot em tempo real para monitorização da equipa
+            onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'team'), snap => {
+                const teamData = snap.docs.map(d => d.data());
+                const allMembers = [...state.contacts.filter(c => c.type === 'user'), ...teamData.filter(t => !state.contacts.find(c => c.name === t.name))];
+
+                grid.innerHTML = allMembers.map(u => {
+                    const statusColor = u.workload > 85 ? 'text-red-500' : 'text-emerald-500';
+                    const riskLabel = u.workload > 85 ? 'RISCO: BURNOUT' : 'ESTÁVEL';
+                    
+                    return `
+                        <div class="glass-panel rounded-3xl p-8 hover:border-zinc-700 transition-all msg-animate">
+                            <div class="flex justify-between items-start mb-6">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-14 h-14 rounded-2xl bg-zinc-900 border border-zinc-800 flex items-center justify-center font-black text-blue-500">
+                                        ${u.name ? u.name.substring(0,2).toUpperCase() : '??'}
+                                    </div>
+                                    <div>
+                                        <h4 class="font-bold text-lg">${u.name || 'Desconhecido'}</h4>
+                                        <p class="text-xs text-zinc-500 mono">${u.role || 'Contributor'}</p>
+                                    </div>
+                                </div>
+                                <span class="text-[9px] font-black ${statusColor} border ${statusColor.replace('text', 'border')}/20 px-2 py-1 rounded bg-zinc-900">
+                                    ${riskLabel}
+                                </span>
+                            </div>
+                            <div class="grid grid-cols-3 gap-4 mb-8 text-center">
+                                <div><p class="text-[10px] text-zinc-500 uppercase font-bold mb-1">Commits</p><p class="text-xl font-black">${u.commits || 0}</p></div>
+                                <div><p class="text-[10px] text-zinc-500 uppercase font-bold mb-1">Impacto</p><p class="text-xl font-black text-blue-400">${u.impact || 0}%</p></div>
+                                <div><p class="text-[10px] text-zinc-500 uppercase font-bold mb-1">Carga</p><p class="text-xl font-black">${u.workload || 0}%</p></div>
+                            </div>
+                            <div class="w-full h-1.5 bg-zinc-900 rounded-full overflow-hidden">
+                                <div class="h-full ${u.workload > 85 ? 'bg-red-500' : 'bg-blue-600'}" style="width: ${u.workload || 0}%"></div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+                lucide.createIcons();
+            }, (err) => console.error("Falha no stream de Analytics:", err));
+        }
+
+        /**
+         * MÓDULO: CHAT (Lógica de Canais)
+         */
+        function renderChatList() {
+            const list = document.getElementById('chat-list');
+            if(!list) return;
+            list.innerHTML = state.contacts.map(c => `
+                <div onclick="selectChat('${c.id}')" id="chat-item-${c.id}" class="chat-item px-5 py-4 flex items-center gap-4 cursor-pointer hover:bg-white/5 transition-all border-b border-zinc-900/50">
+                    <div class="relative">
+                        <div class="w-12 h-12 rounded-2xl ${c.type === 'channel' ? 'bg-blue-600/20 text-blue-400' : 'bg-zinc-800 text-zinc-400'} flex items-center justify-center font-bold">
+                            ${c.type === 'channel' ? '#' : c.name.substring(0,2).toUpperCase()}
+                        </div>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex justify-between items-baseline">
+                            <h4 class="text-sm font-bold text-zinc-200 truncate">${c.name}</h4>
+                            <span class="text-[10px] text-zinc-600">${c.time}</span>
+                        </div>
+                        <p class="text-xs text-zinc-500 truncate">${c.lastMsg}</p>
+                    </div>
+                </div>
+            `).join('');
+            lucide.createIcons();
+        }
+
+        window.selectChat = (id) => {
+            state.activeContact = id;
+            const contact = state.contacts.find(c => c.id === id);
+            document.querySelectorAll('.chat-item').forEach(el => el.classList.remove('active'));
+            const item = document.getElementById(`chat-item-${id}`);
+            if(item) item.classList.add('active');
+            
+            document.getElementById('chat-input-container').classList.remove('hidden');
+            document.getElementById('active-chat-header').innerHTML = `
+                <div class="w-8 h-8 rounded-lg bg-zinc-800 flex items-center justify-center font-bold text-xs text-blue-500">
+                    ${contact.type === 'channel' ? '#' : contact.name.substring(0,2).toUpperCase()}
+                </div>
+                <div><h3 class="text-sm font-bold text-white leading-none">${contact.name}</h3></div>
+            `;
+            loadMessages(id);
+        };
+
+        let messageUnsubscribe = null;
+        function loadMessages(channelId) {
+            if (!state.user) return; 
+            if (messageUnsubscribe) messageUnsubscribe();
+            
+            const scroller = document.getElementById('chat-scroller');
+            const q = query(
+                collection(db, 'artifacts', appId, 'public', 'data', `chat_${channelId}`), 
+                orderBy('timestamp', 'asc'), 
+                limit(50)
+            );
+
+            messageUnsubscribe = onSnapshot(q, snap => {
+                scroller.innerHTML = snap.docs.map(doc => {
+                    const m = doc.data();
+                    const isMe = m.uid === state.user.uid;
+                    return `
+                        <div class="flex ${isMe ? 'justify-end' : 'justify-start'} msg-animate">
+                            <div class="max-w-[70%] bg-${isMe ? 'blue-600' : 'zinc-900'} px-4 py-2.5 rounded-2xl ${isMe ? 'rounded-tr-sm' : 'rounded-tl-sm border border-zinc-800'}">
+                                <p class="text-sm">${m.text}</p>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+                scroller.scrollTop = scroller.scrollHeight;
+            }, (err) => console.error("Erro no stream de mensagens:", err));
+        }
+
+        document.getElementById('btn-send').onclick = async () => {
+            const input = document.getElementById('main-input');
+            const text = input.value.trim();
+            if (!text || !state.activeContact || !state.user) return;
+            const chanId = state.activeContact;
+            input.value = '';
+            try {
+                await addDoc(collection(db, 'artifacts', appId, 'public', 'data', `chat_${chanId}`), {
+                    text, 
+                    uid: state.user.uid, 
+                    author: `Arquiteto`, 
+                    timestamp: serverTimestamp()
+                });
+            } catch (e) { console.error("Falha ao enviar mensagem:", e); }
+        };
+
+        function initHeatmap() {
+            const heatmap = document.getElementById('global-heatmap');
+            if(!heatmap) return;
+            let html = '';
+            for(let i=0; i<48; i++) {
+                const level = Math.random() > 0.7 ? Math.floor(Math.random() * 4) : 0;
+                const colors = ['bg-zinc-900', 'bg-blue-950', 'bg-blue-800', 'bg-blue-600', 'bg-blue-400'];
+                html += `<div class="${colors[level]} rounded-sm"></div>`;
+            }
+            heatmap.innerHTML = html;
+        }
+
+        lucide.createIcons();
+    </script>
+</body>
+</html>

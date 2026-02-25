@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LearnCodigo | Enterprise OS v3.6</title>
+    <title>LearnCodigo | Enterprise OS v3.6 (Demo Mode)</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Fallback para Lucide se o CDN falhar -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
@@ -49,7 +48,6 @@
             border-right: 3px solid var(--accent);
         }
 
-        /* Garantir visibilidade dos ícones */
         i[data-lucide] {
             display: inline-block;
             stroke-width: 2;
@@ -85,8 +83,8 @@
                 <span id="view-title" class="text-xs font-black uppercase tracking-widest text-zinc-400">Communication Node</span>
                 <div class="h-4 w-[1px] bg-zinc-800"></div>
                 <div id="status-indicator" class="flex items-center gap-2">
-                    <div class="w-1.5 h-1.5 rounded-full bg-yellow-500 animate-pulse"></div>
-                    <span class="text-[10px] font-bold text-zinc-500 uppercase">A sincronizar...</span>
+                    <div class="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
+                    <span class="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Modo Demo Ativo</span>
                 </div>
             </div>
         </header>
@@ -98,7 +96,7 @@
                     <h3 class="text-[10px] font-black text-zinc-600 uppercase tracking-widest">Terminais Disponíveis</h3>
                 </div>
                 <div id="contact-list" class="flex-1 overflow-y-auto custom-scrollbar p-2">
-                    <!-- Dinâmico -->
+                    <!-- Preenchido via Script -->
                 </div>
             </aside>
 
@@ -114,7 +112,7 @@
                     <div class="max-w-4xl mx-auto flex gap-3">
                         <input type="text" id="msg-input" placeholder="Introduzir comando..." class="flex-1 bg-zinc-900/50 border border-zinc-800 rounded-xl px-4 py-3 text-sm outline-none focus:border-blue-500/50 transition-all text-zinc-200">
                         <button onclick="sendMsg()" class="bg-blue-600 hover:bg-blue-500 px-6 rounded-xl transition-all active:scale-95 flex items-center justify-center">
-                            <i data-lucide="send" class="w-4 h-4"></i>
+                            <i data-lucide="send" class="w-4 h-4 text-white"></i>
                         </button>
                     </div>
                 </div>
@@ -126,100 +124,60 @@
             <div class="max-w-6xl mx-auto w-full">
                 <h2 class="text-2xl font-black mb-8 italic tracking-tighter">CORE ANALYTICS</h2>
                 <div id="metrics-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <!-- Dinâmico -->
+                    <!-- Preenchido via Script -->
                 </div>
             </div>
         </section>
     </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getFirestore, collection, onSnapshot, addDoc, doc, setDoc, query, orderBy, limit, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-
-        // CONFIGURAÇÃO
-        const firebaseConfig = JSON.parse(__firebase_config);
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const auth = getAuth(app);
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'ent-os-v36-prod';
-
-        let currentUser = null;
+    <script>
+        // --- DADOS DE DEMONSTRAÇÃO (SUBSTITUINDO FIREBASE) ---
         let currentChatId = null;
-        let chatUnsubscribe = null;
-
+        const mockUser = { uid: 'USER-001', name: 'Agent_Alpha' };
+        
         const channels = [
             { id: 'general', name: 'Canal Central', type: 'node' },
             { id: 'security', name: 'Security Protocol', type: 'node' },
             { id: 'sys-admin', name: 'Root Admin', type: 'user' }
         ];
 
-        // --- INICIALIZAÇÃO SEGURA ---
-        async function start() {
-            // Forçar renderização da lista logo no início para evitar ecrã vazio
-            renderContacts();
-            
-            try {
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    await signInWithCustomToken(auth, __initial_auth_token);
-                } else {
-                    await signInAnonymously(auth);
-                }
-            } catch (err) { 
-                console.error("Auth Erro:", err);
-                document.getElementById('status-indicator').innerHTML = `<span class="text-[10px] text-red-500 font-bold uppercase">Erro Conexão</span>`;
-            }
-        }
+        const chatHistory = {
+            'general': [
+                { text: "Sistema inicializado. Protocolo de segurança nível 4.", sender: "ID-00A1", uid: "bot" },
+                { text: "Todas as estações reportando status verde.", sender: "ID-00B2", uid: "bot" }
+            ],
+            'security': [],
+            'sys-admin': [{ text: "Aguardo relatório de progresso da fase 1.", sender: "ID-ROOT", uid: "root" }]
+        };
 
-        onAuthStateChanged(auth, user => {
-            if (user) {
-                currentUser = user;
-                document.getElementById('status-indicator').innerHTML = `
-                    <div class="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
-                    <span class="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Enclave Ativo</span>
-                `;
-                syncUser();
-                if(typeof lucide !== 'undefined') lucide.createIcons();
-            }
-        });
-
-        async function syncUser() {
-            if(!currentUser) return;
-            try {
-                const ref = doc(db, 'artifacts', appId, 'public', 'data', 'team', currentUser.uid);
-                await setDoc(ref, {
-                    uid: currentUser.uid,
-                    name: `Agent_${currentUser.uid.substring(0,4)}`,
-                    role: 'Analista Principal',
-                    activity: Math.floor(Math.random() * 20) + 80,
-                    timestamp: serverTimestamp()
-                }, { merge: true });
-            } catch(e) { console.error("Sync Error:", e); }
-        }
+        const teamMetrics = [
+            { name: "Agent_Alpha", uid: "USER-001", role: "Analista Principal", activity: 94 },
+            { name: "Agent_Beta", uid: "USER-002", role: "DevOps Engineer", activity: 82 },
+            { name: "System_Core", uid: "ROOT-SYS", role: "Administrator", activity: 100 }
+        ];
 
         // --- LÓGICA DE INTERFACE ---
+        function start() {
+            renderContacts();
+            renderMetrics();
+            if(window.lucide) lucide.createIcons();
+        }
+
         window.changeTab = (tab) => {
             document.querySelectorAll('.view-layer').forEach(l => l.classList.remove('active'));
             document.querySelectorAll('.nav-link').forEach(n => n.classList.remove('active'));
             
-            const activeView = document.getElementById(`view-${tab}`);
-            const activeTab = document.getElementById(`tab-${tab}`);
-            
-            if(activeView) activeView.classList.add('active');
-            if(activeTab) activeTab.classList.add('active');
+            document.getElementById(`view-${tab}`).classList.add('active');
+            document.getElementById(`tab-${tab}`).classList.add('active');
             
             document.getElementById('view-title').innerText = tab === 'chat' ? 'Communication Node' : 'System Metrics';
-            
-            if(tab === 'metrics') renderMetrics();
-            if(typeof lucide !== 'undefined') lucide.createIcons();
+            if(window.lucide) lucide.createIcons();
         }
 
         function renderContacts() {
             const container = document.getElementById('contact-list');
-            if(!container) return;
-
             container.innerHTML = channels.map(c => `
-                <div onclick="openChat('${c.id}')" id="item-${c.id}" class="chat-item p-4 rounded-xl cursor-pointer hover:bg-white/[0.03] transition-all mb-1 flex items-center gap-3 border border-transparent hover:border-zinc-800">
+                <div onclick="openChat('${c.id}')" id="item-${c.id}" class="chat-item p-4 rounded-xl cursor-pointer hover:bg-white/[0.03] transition-all mb-1 flex items-center gap-3 border border-transparent">
                     <div class="w-10 h-10 rounded-lg bg-zinc-900 flex items-center justify-center text-blue-500/70">
                         <i data-lucide="${c.type === 'node' ? 'hash' : 'user'}" class="w-4 h-4"></i>
                     </div>
@@ -229,32 +187,26 @@
                     </div>
                 </div>
             `).join('');
-            
-            if(typeof lucide !== 'undefined') lucide.createIcons();
+            if(window.lucide) lucide.createIcons();
         }
 
         window.openChat = (id) => {
             currentChatId = id;
             document.querySelectorAll('.chat-item').forEach(el => el.classList.remove('active-chat'));
-            const activeItem = document.getElementById(`item-${id}`);
-            if(activeItem) activeItem.classList.add('active-chat');
-            
+            document.getElementById(`item-${id}`).classList.add('active-chat');
             document.getElementById('input-area').classList.remove('hidden');
+            renderMessages();
+        }
 
-            if(chatUnsubscribe) chatUnsubscribe();
-
-            const msgRef = collection(db, 'artifacts', appId, 'public', 'data', `msg_${id}`);
-            const q = query(msgRef, orderBy('timestamp', 'asc'), limit(50));
-
-            chatUnsubscribe = onSnapshot(q, snap => {
-                const box = document.getElementById('chat-messages');
-                if(snap.empty) {
-                    box.innerHTML = `<div class="m-auto text-zinc-800 text-[10px] font-bold uppercase tracking-widest italic">Início da transmissão segura</div>`;
-                    return;
-                }
-                box.innerHTML = snap.docs.map(d => {
-                    const m = d.data();
-                    const isMe = m.uid === currentUser?.uid;
+        function renderMessages() {
+            const box = document.getElementById('chat-messages');
+            const msgs = chatHistory[currentChatId] || [];
+            
+            if(msgs.length === 0) {
+                box.innerHTML = `<div class="m-auto text-zinc-800 text-[10px] font-bold uppercase tracking-widest italic">Início da transmissão segura</div>`;
+            } else {
+                box.innerHTML = msgs.map(m => {
+                    const isMe = m.uid === mockUser.uid;
                     return `
                         <div class="flex flex-col ${isMe ? 'items-end' : 'items-start'} animate-in fade-in slide-in-from-bottom-2 duration-300">
                             <div class="max-w-[80%] ${isMe ? 'bg-blue-600 text-white' : 'bg-zinc-900 text-zinc-300 border border-zinc-800'} px-4 py-2 rounded-2xl ${isMe ? 'rounded-tr-none' : 'rounded-tl-none'}">
@@ -264,75 +216,56 @@
                         </div>
                     `;
                 }).join('');
-                box.scrollTop = box.scrollHeight;
-            }, err => {
-                console.warn("Firestore Read Error:", err);
-            });
+            }
+            box.scrollTop = box.scrollHeight;
+            if(window.lucide) lucide.createIcons();
         }
 
-        window.sendMsg = async () => {
+        window.sendMsg = () => {
             const input = document.getElementById('msg-input');
             const text = input.value.trim();
-            if(!text || !currentChatId || !currentUser) return;
+            if(!text || !currentChatId) return;
 
-            const tempText = text;
+            chatHistory[currentChatId].push({
+                text: text,
+                uid: mockUser.uid,
+                sender: `ID-${mockUser.uid.split('-')[1]}`,
+            });
+
             input.value = '';
-
-            try {
-                await addDoc(collection(db, 'artifacts', appId, 'public', 'data', `msg_${currentChatId}`), {
-                    text: tempText,
-                    uid: currentUser.uid,
-                    sender: `ID-${currentUser.uid.substring(0,4)}`,
-                    timestamp: serverTimestamp()
-                });
-            } catch (e) { 
-                console.error("Erro Envio:", e);
-                input.value = tempText; // Devolve o texto em caso de erro
-            }
+            renderMessages();
         }
 
         function renderMetrics() {
             const grid = document.getElementById('metrics-grid');
-            if(!grid) return;
-
-            onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'team'), snap => {
-                grid.innerHTML = snap.docs.map(d => {
-                    const u = d.data();
-                    return `
-                        <div class="glass-panel p-6 rounded-2xl border-zinc-800/50 hover:border-blue-500/30 transition-all group">
-                            <div class="flex justify-between items-center mb-6">
-                                <div class="px-2 py-1 rounded bg-blue-500/10 text-blue-500 text-[8px] font-black uppercase tracking-widest">${u.role}</div>
-                                <div class="w-2 h-2 rounded-full bg-emerald-500 shadow-lg shadow-emerald-500/50"></div>
-                            </div>
-                            <h3 class="text-lg font-bold text-zinc-100 group-hover:text-blue-400 transition-colors">${u.name}</h3>
-                            <p class="text-[9px] text-zinc-700 font-mono mt-1 mb-6">${u.uid}</p>
-                            
-                            <div class="space-y-3">
-                                <div class="flex justify-between items-end">
-                                    <span class="text-[10px] font-bold text-zinc-500">FREQUÊNCIA DE SINCRONIZAÇÃO</span>
-                                    <span class="text-[10px] font-mono text-zinc-300">${u.activity}%</span>
-                                </div>
-                                <div class="w-full h-1 bg-zinc-900 rounded-full overflow-hidden">
-                                    <div class="h-full bg-gradient-to-r from-blue-600 to-cyan-400 transition-all duration-1000" style="width: ${u.activity}%"></div>
-                                </div>
-                            </div>
+            grid.innerHTML = teamMetrics.map(u => `
+                <div class="glass-panel p-6 rounded-2xl border-zinc-800/50 hover:border-blue-500/30 transition-all group">
+                    <div class="flex justify-between items-center mb-6">
+                        <div class="px-2 py-1 rounded bg-blue-500/10 text-blue-500 text-[8px] font-black uppercase tracking-widest">${u.role}</div>
+                        <div class="w-2 h-2 rounded-full bg-emerald-500 shadow-lg shadow-emerald-500/50"></div>
+                    </div>
+                    <h3 class="text-lg font-bold text-zinc-100 group-hover:text-blue-400 transition-colors">${u.name}</h3>
+                    <p class="text-[9px] text-zinc-700 font-mono mt-1 mb-6">${u.uid}</p>
+                    
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-end">
+                            <span class="text-[10px] font-bold text-zinc-500">FREQUÊNCIA DE SINCRONIZAÇÃO</span>
+                            <span class="text-[10px] font-mono text-zinc-300">${u.activity}%</span>
                         </div>
-                    `;
-                }).join('');
-            });
+                        <div class="w-full h-1 bg-zinc-900 rounded-full overflow-hidden">
+                            <div class="h-full bg-gradient-to-r from-blue-600 to-cyan-400 transition-all duration-1000" style="width: ${u.activity}%"></div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
         }
 
-        // Eventos de Teclado
         document.getElementById('msg-input').addEventListener('keypress', (e) => {
             if(e.key === 'Enter') sendMsg();
         });
 
-        // Loop de Segurança para Ícones
-        setInterval(() => {
-            if(typeof lucide !== 'undefined') lucide.createIcons();
-        }, 2000);
-
-        start();
+        // Inicializar após carregamento do DOM
+        window.addEventListener('load', start);
     </script>
 </body>
 </html>

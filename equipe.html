@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LearnCodigo | Enterprise OS</title>
+    <title>LearnCodigo | Enterprise OS v2.0</title>
     
     <!-- Frameworks & Fonts -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -14,7 +14,7 @@
         :root {
             --accent: #06b6d4;
             --bg-dark: #030303;
-            --card-bg: rgba(15, 15, 18, 0.6);
+            --card-bg: rgba(15, 15, 18, 0.7);
             --border: rgba(255, 255, 255, 0.05);
         }
 
@@ -27,51 +27,30 @@
         }
 
         .font-mono { font-family: 'JetBrains Mono', monospace; }
-
-        .glass-panel {
-            background: var(--card-bg);
-            backdrop-filter: blur(16px);
-            border: 1px solid var(--border);
-        }
-
-        .glass-btn {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid var(--border);
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .glass-btn:hover {
-            background: rgba(255, 255, 255, 0.08);
-            border-color: var(--accent);
-        }
-
+        .glass-panel { background: var(--card-bg); backdrop-filter: blur(20px); border: 1px solid var(--border); }
+        
         .nav-active {
             background: rgba(6, 182, 212, 0.1);
             color: var(--accent) !important;
             border-right: 3px solid var(--accent);
         }
 
-        .custom-scrollbar::-webkit-scrollbar { width: 5px; }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #18181b; border-radius: 10px; }
-        
-        .chat-bubble-me { background: var(--accent); color: black; border-radius: 12px 12px 2px 12px; }
-        .chat-bubble-them { background: #18181b; color: #f4f4f5; border-radius: 12px 12px 12px 2px; border: 1px solid var(--border); }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #27272a; border-radius: 10px; }
 
-        @keyframes pulse-cyan {
-            0% { box-shadow: 0 0 0 0 rgba(6, 182, 212, 0.4); }
-            70% { box-shadow: 0 0 0 10px rgba(6, 182, 212, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(6, 182, 212, 0); }
-        }
-        .voice-active { animation: pulse-cyan 2s infinite; }
+        .chat-bubble-me { background: #075e54; color: white; border-radius: 8px 0px 8px 8px; }
+        .chat-bubble-them { background: #262d31; color: #e9edef; border-radius: 0px 8px 8px 8px; }
 
-        .status-badge {
-            font-size: 8px;
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-weight: 800;
-            text-transform: uppercase;
+        .status-pulse {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+            box-shadow: 0 0 0 rgba(16, 185, 129, 0.4);
+            animation: pulse 2s infinite;
         }
+        @keyframes pulse { 0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); } 70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); } 100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); } }
     </style>
 </head>
 <body class="h-screen flex text-sm selection:bg-cyan-500/30">
@@ -91,339 +70,557 @@
 
             <nav class="space-y-1 mb-8" id="sidebar-nav">
                 <p class="text-[10px] uppercase font-bold text-zinc-600 tracking-widest px-3 mb-2">Workspace</p>
-                <button onclick="window.router.navigate('dashboard')" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-zinc-400 hover:bg-white/5 transition-all nav-active" data-page="dashboard">
+                <button onclick="window.router.navigate('dashboards')" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-zinc-400 hover:bg-white/5 transition-all nav-active" data-page="dashboards">
                     <i data-lucide="layout-grid" class="w-4 h-4"></i> Dashboards
                 </button>
                 <button onclick="window.router.navigate('chat')" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-zinc-400 hover:bg-white/5 transition-all" data-page="chat">
                     <i data-lucide="message-square" class="w-4 h-4"></i> Comunicação
                 </button>
-                <button onclick="window.router.navigate('git')" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-zinc-400 hover:bg-white/5 transition-all" data-page="git">
-                    <i data-lucide="git-branch" class="w-4 h-4"></i> Git & Branches
-                </button>
                 <button onclick="window.router.navigate('pipeline')" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-zinc-400 hover:bg-white/5 transition-all" data-page="pipeline">
-                    <i data-lucide="activity" class="w-4 h-4"></i> Pipeline CI/CD
+                    <i data-lucide="activity" class="w-4 h-4"></i> Pipeline & Logs
+                </button>
+                <button onclick="window.router.navigate('git')" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-zinc-400 hover:bg-white/5 transition-all" data-page="git">
+                    <i data-lucide="git-branch" class="w-4 h-4"></i> Gestão de Branches
                 </button>
             </nav>
 
             <div class="mt-8">
-                <p class="text-[10px] uppercase font-bold text-zinc-600 tracking-widest px-3 mb-3">Canais de Voz</p>
-                <div id="voice-channels-list" class="space-y-1 text-zinc-500">
-                    <!-- Dinâmico via JS -->
+                <p class="text-[10px] uppercase font-bold text-zinc-600 tracking-widest px-3 mb-3">Equipe de Voz</p>
+                <div id="voice-team-list" class="space-y-2 px-3">
+                    <!-- Lista dinâmica de vozes -->
                 </div>
+                <button onclick="window.voice.requestJoin()" class="mt-4 w-full py-2 bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 rounded-lg text-[10px] font-bold uppercase tracking-wider text-zinc-400 transition-all">
+                    Solicitar Entrada
+                </button>
             </div>
         </div>
 
-        <!-- Perfil Footer -->
+        <!-- Perfil do Usuário -->
         <div class="p-4 border-t border-zinc-900 bg-black/40">
-            <div class="flex items-center gap-3 p-2 rounded-lg hover:bg-white/5 cursor-pointer">
+            <div class="flex items-center gap-3 p-2 rounded-lg">
                 <div class="relative">
-                    <div id="u-avatar" class="w-9 h-9 rounded-full bg-zinc-800 flex items-center justify-center font-bold text-xs uppercase border border-zinc-700">?</div>
-                    <div class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 border-2 border-[#030303] rounded-full"></div>
+                    <div id="u-avatar" class="w-9 h-9 rounded-full bg-cyan-500/20 text-cyan-500 flex items-center justify-center font-bold text-xs border border-cyan-500/30">?</div>
+                    <div id="u-status-dot" class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-zinc-500 border-2 border-[#030303] rounded-full"></div>
                 </div>
                 <div class="truncate">
-                    <p id="u-name" class="font-bold text-xs truncate">Utilizador</p>
-                    <p id="u-status-label" class="text-[9px] text-zinc-500 font-mono">OFFLINE</p>
+                    <p id="u-name" class="font-bold text-xs truncate">Conectando...</p>
+                    <p id="u-role" class="text-[9px] text-zinc-500 font-mono uppercase">Offline</p>
                 </div>
             </div>
         </div>
     </aside>
 
-    <!-- Content Area -->
-    <main class="flex-1 flex flex-col relative overflow-hidden bg-[radial-gradient(circle_at_50%_0%,rgba(6,182,212,0.05),transparent)]">
-        <!-- Top Bar -->
+    <!-- Main Content Area -->
+    <main class="flex-1 flex flex-col relative overflow-hidden bg-[radial-gradient(circle_at_50%_0%,rgba(6,182,212,0.03),transparent)]">
         <header class="h-16 border-b border-zinc-900 flex items-center justify-between px-8 bg-black/20 backdrop-blur-md z-40">
             <div id="view-title" class="flex items-center gap-4 text-xs font-bold uppercase tracking-[0.2em] text-zinc-400">
                 Dashboard <span class="text-white mx-2">/</span> Geral
             </div>
             <div class="flex items-center gap-4">
-                <div id="online-team" class="flex -space-x-2 mr-4"></div>
                 <div id="db-status" class="flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-900 border border-zinc-800">
-                    <div class="w-1.5 h-1.5 rounded-full bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.5)]"></div>
-                    <span class="text-[9px] font-bold text-zinc-400 uppercase tracking-tighter">Sincronizando...</span>
+                    <div id="status-indicator-dot" class="w-1.5 h-1.5 rounded-full bg-amber-500"></div>
+                    <span id="status-text" class="text-[9px] font-bold text-zinc-400 uppercase tracking-tighter">Sincronizando...</span>
                 </div>
             </div>
         </header>
 
-        <!-- Viewport -->
-        <div id="app-viewport" class="flex-1 overflow-y-auto custom-scrollbar p-8">
-            <!-- Loading -->
+        <!-- Viewport Dinâmico -->
+        <div id="app-viewport" class="flex-1 overflow-y-auto custom-scrollbar">
+            <!-- Loader Inicial -->
             <div class="h-full flex flex-col items-center justify-center opacity-50">
                 <div class="w-8 h-8 border-2 border-cyan-500/20 border-t-cyan-500 rounded-full animate-spin"></div>
+                <p class="mt-4 font-mono text-[10px] text-zinc-500 uppercase tracking-widest">Iniciando Engine...</p>
             </div>
         </div>
     </main>
 
+    <!-- Firebase SDK Modular -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc, collection, query, onSnapshot, addDoc, updateDoc, deleteDoc, serverTimestamp, orderBy, limit } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, getDoc, updateDoc, onSnapshot, collection, query, orderBy, addDoc, serverTimestamp, where, limit } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // --- Configuração Segura ---
-        let db = null;
-        let auth = null;
-        let isFirebaseReady = false;
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'learncodigo-dev';
+        // --- GLOBAL STATE ---
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'learncodigo-master';
+        let db, auth, currentUser;
+        
+        // --- MODULE: AUTH & INITIALIZATION ---
+        const initApp = async () => {
+            try {
+                const firebaseConfig = JSON.parse(__firebase_config);
+                const app = initializeApp(firebaseConfig);
+                auth = getAuth(app);
+                db = getFirestore(app);
 
-        // --- Estado da Aplicação ---
-        let currentUser = { uid: 'local-user', displayName: 'Developer Local' };
-        let teamData = [];
-        let activePage = 'dashboard';
-        const VOICE_CHANNELS = ['Geral', 'Desenvolvimento', 'Cafetaria'];
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
 
-        // --- Sistema de Router ---
+                onAuthStateChanged(auth, (user) => {
+                    if (user) {
+                        currentUser = user;
+                        setupUserProfile(user);
+                        window.router.navigate('dashboards');
+                        startRealtimeSync();
+                    }
+                });
+            } catch (err) {
+                console.error("Firebase Init Error:", err);
+                document.getElementById('status-text').innerText = "ERRO DE CONEXÃO";
+            }
+        };
+
+        const setupUserProfile = (user) => {
+            const userRef = doc(db, 'artifacts', appId, 'public', 'data', 'team', user.uid);
+            setDoc(userRef, {
+                uid: user.uid,
+                name: `Dev_${user.uid.slice(0, 4)}`,
+                status: 'online',
+                role: 'Full Stack Developer',
+                lastSeen: serverTimestamp()
+            }, { merge: true });
+
+            document.getElementById('u-name').innerText = `DEV_${user.uid.slice(0, 4)}`;
+            document.getElementById('u-avatar').innerText = user.uid[0].toUpperCase();
+            document.getElementById('u-role').innerText = "Developer Activo";
+            document.getElementById('u-status-dot').className = "absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 border-2 border-[#030303] rounded-full";
+            document.getElementById('status-text').innerText = "ONLINE";
+            document.getElementById('status-indicator-dot').className = "w-1.5 h-1.5 rounded-full bg-emerald-500";
+        };
+
+        // --- MODULE: ROUTER ---
         window.router = {
+            activePage: 'dashboards',
             navigate: (page) => {
-                activePage = page;
+                window.router.activePage = page;
                 document.querySelectorAll('[data-page]').forEach(el => {
                     el.classList.toggle('nav-active', el.dataset.page === page);
                 });
-                renderView();
+                renderPage(page);
             }
         };
 
-        // --- Inicialização ---
-        const startApp = async () => {
-            try {
-                if (typeof __firebase_config !== 'undefined' && __firebase_config) {
-                    const firebaseConfig = JSON.parse(__firebase_config);
-                    const app = initializeApp(firebaseConfig);
-                    auth = getAuth(app);
-                    db = getFirestore(app);
-                    
-                    const initAuth = async () => {
-                        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                            await signInWithCustomToken(auth, __initial_auth_token);
-                        } else {
-                            await signInAnonymously(auth);
-                        }
-                    };
-
-                    await initAuth();
-                    onAuthStateChanged(auth, (user) => {
-                        if (user) {
-                            currentUser = user;
-                            isFirebaseReady = true;
-                            updateStatusUI('Conectado', 'bg-emerald-500');
-                            setupFirestoreListeners();
-                        }
-                    });
-                } else {
-                    throw new Error("Config not found");
-                }
-            } catch (e) {
-                console.warn("Utilizando modo Offline/Simulado.");
-                updateStatusUI('Local Mode', 'bg-blue-500');
-                // Gerar dados mock para teste local imediato
-                teamData = [{ uid: 'local-user', displayName: 'Tu (Local)', metrics: { tcc: 140, commits: 52, tasks: 8, uptime: 98 }, currentRoom: 'Geral', voiceStatus: 'idle' }];
-                renderView();
-            }
-        };
-
-        const updateStatusUI = (text, colorClass) => {
-            const el = document.getElementById('db-status');
-            if (el) {
-                el.innerHTML = `<div class="w-1.5 h-1.5 rounded-full ${colorClass} shadow-[0_0_8px_rgba(0,0,0,0.3)]"></div><span class="text-[9px] font-bold text-zinc-400 uppercase tracking-tighter">${text}</span>`;
-            }
-            document.getElementById('u-status-label').textContent = text.toUpperCase();
-        };
-
-        // --- Firestore Real-time Sync ---
-        const setupFirestoreListeners = () => {
-            const teamRef = collection(db, 'artifacts', appId, 'public', 'data', 'team');
+        const renderPage = (page) => {
+            const vp = document.getElementById('app-viewport');
+            const title = document.getElementById('view-title');
             
-            // Auto-registo do user
-            setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'team', currentUser.uid), {
-                uid: currentUser.uid,
-                displayName: `Dev_${currentUser.uid.slice(0, 4)}`,
-                metrics: { tcc: 120, commits: 34, tasks: 5, uptime: 92 },
-                lastActive: serverTimestamp()
-            }, { merge: true });
-
-            onSnapshot(teamRef, (snap) => {
-                teamData = snap.docs.map(d => d.data());
-                updateOnlineBar();
-                updateVoiceUI();
-                if (activePage === 'dashboard' || activePage === 'chat') renderView();
-            });
-        };
-
-        // --- Renderers ---
-        const renderView = () => {
-            const viewport = document.getElementById('app-viewport');
-            const titleEl = document.getElementById('view-title');
-            if (!viewport) return;
-
-            viewport.innerHTML = '';
-            
-            switch(activePage) {
-                case 'dashboard':
-                    titleEl.innerHTML = `Dashboard <span class="text-white mx-2">/</span> Geral`;
-                    renderDashboard(viewport);
+            switch(page) {
+                case 'dashboards':
+                    title.innerHTML = `Dashboards <span class="text-white mx-2">/</span> Analítica Geral`;
+                    vp.innerHTML = renderDashboards();
+                    initAnalyticsCharts();
                     break;
                 case 'chat':
-                    titleEl.innerHTML = `Comunicação <span class="text-white mx-2">/</span> Mensagens`;
-                    renderChat(viewport);
-                    break;
-                case 'git':
-                    titleEl.innerHTML = `Gitflow <span class="text-white mx-2">/</span> Branches`;
-                    renderGit(viewport);
+                    title.innerHTML = `Comunicação <span class="text-white mx-2">/</span> Private Chats`;
+                    vp.innerHTML = renderChatUI();
+                    window.chat.init();
                     break;
                 case 'pipeline':
-                    titleEl.innerHTML = `DevOps <span class="text-white mx-2">/</span> CI/CD Pipeline`;
-                    renderPipeline(viewport);
+                    title.innerHTML = `DevOps <span class="text-white mx-2">/</span> Pipeline & Logs`;
+                    vp.innerHTML = renderPipeline();
+                    window.pipeline.init();
+                    break;
+                case 'git':
+                    title.innerHTML = `Git <span class="text-white mx-2">/</span> Pull Requests`;
+                    vp.innerHTML = renderGitBranches();
+                    window.branches.init();
                     break;
             }
             lucide.createIcons();
         };
 
-        const renderDashboard = (container) => {
-            const user = teamData.find(u => u.uid === currentUser.uid) || teamData[0];
-            const m = user.metrics;
+        // --- TEMPLATES: DASHBOARDS ---
+        const renderDashboards = () => `
+            <div class="p-8 space-y-8 animate-in fade-in duration-500">
+                <!-- Seção Individual -->
+                <div class="space-y-4">
+                    <h2 class="text-xs font-bold text-zinc-500 uppercase tracking-widest flex items-center gap-2">
+                        <i data-lucide="user" class="w-3 h-3"></i> Dashboard Individual
+                    </h2>
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        ${renderStatCard('Tempo TCC', '142h 20m', 'clock', 'text-cyan-500')}
+                        ${renderStatCard('Turno Ativo', '04h 12m', 'timer', 'text-amber-500')}
+                        ${renderStatCard('Commits', '84', 'git-commit', 'text-emerald-500')}
+                        ${renderStatCard('Tasks', '12/15', 'check-circle', 'text-indigo-500')}
+                    </div>
+                </div>
 
-            container.innerHTML = `
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-6 animate-in fade-in duration-500">
-                    <div class="glass-panel p-6 rounded-2xl border-l-4 border-cyan-500">
-                        <p class="text-[10px] font-bold text-zinc-500 uppercase mb-4">Horas TCC</p>
-                        <h3 class="text-3xl font-mono font-bold">${m.tcc}h</h3>
-                    </div>
-                    <div class="glass-panel p-6 rounded-2xl border-l-4 border-purple-500">
-                        <p class="text-[10px] font-bold text-zinc-500 uppercase mb-4">Commits</p>
-                        <h3 class="text-3xl font-mono font-bold">${m.commits}</h3>
-                    </div>
-                    <div class="glass-panel p-6 rounded-2xl border-l-4 border-emerald-500">
-                        <p class="text-[10px] font-bold text-zinc-500 uppercase mb-4">Tarefas</p>
-                        <h3 class="text-3xl font-mono font-bold">${m.tasks}</h3>
-                    </div>
-                    <div class="glass-panel p-6 rounded-2xl border-l-4 border-amber-500">
-                        <p class="text-[10px] font-bold text-zinc-500 uppercase mb-4">Uptime</p>
-                        <h3 class="text-3xl font-mono font-bold">${m.uptime}%</h3>
-                    </div>
-
-                    <div class="md:col-span-4 glass-panel p-8 rounded-3xl min-h-[300px] flex flex-col justify-center items-center text-center">
-                        <i data-lucide="bar-chart-3" class="w-12 h-12 text-zinc-800 mb-4"></i>
-                        <h2 class="text-xl font-bold mb-2">Relatório de Produtividade Ativo</h2>
-                        <p class="text-zinc-500 max-w-md mx-auto">Os dados estão a ser recolhidos em tempo real de todas as estações de trabalho conectadas.</p>
-                        <div class="mt-8 flex gap-4">
-                            <div class="h-2 w-32 bg-zinc-800 rounded-full overflow-hidden">
-                                <div class="h-full bg-cyan-500 w-[70%]"></div>
+                <!-- Seção Coletiva -->
+                <div class="space-y-4 pt-4 border-t border-zinc-900">
+                    <h2 class="text-xs font-bold text-zinc-500 uppercase tracking-widest flex items-center gap-2">
+                        <i data-lucide="users" class="w-3 h-3"></i> Dashboard da Equipe
+                    </h2>
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <div class="lg:col-span-2 glass-panel rounded-2xl p-6 min-h-[300px] flex flex-col">
+                            <div class="flex justify-between items-center mb-6">
+                                <span class="text-[10px] font-bold text-zinc-400">PRODUTIVIDADE SEMANAL</span>
+                                <div class="flex gap-2">
+                                    <div class="flex items-center gap-1"><div class="w-2 h-2 rounded-full bg-cyan-500"></div><span class="text-[8px]">Commits</span></div>
+                                    <div class="flex items-center gap-1"><div class="w-2 h-2 rounded-full bg-zinc-700"></div><span class="text-[8px]">Docs</span></div>
+                                </div>
                             </div>
-                            <span class="text-[10px] font-mono text-cyan-500">70% TARGET</span>
+                            <div class="flex-1 flex items-end gap-2 px-2" id="chart-productivity">
+                                ${[40, 70, 45, 90, 65, 80, 50].map(h => `<div class="flex-1 bg-cyan-500/20 rounded-t hover:bg-cyan-500/40 transition-all cursor-help relative group" style="height: ${h}%"><div class="absolute -top-6 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 text-[8px] bg-black px-1 rounded">${h}</div></div>`).join('')}
+                            </div>
+                            <div class="flex justify-between mt-4 text-[8px] text-zinc-600 font-bold uppercase">
+                                <span>Seg</span><span>Ter</span><span>Qua</span><span>Qui</span><span>Sex</span><span>Sab</span><span>Dom</span>
+                            </div>
+                        </div>
+                        <div class="glass-panel rounded-2xl p-6 flex flex-col justify-between">
+                            <div>
+                                <p class="text-[10px] font-bold text-zinc-500 mb-6 uppercase">Top Contributors</p>
+                                <div id="top-team-list" class="space-y-4">
+                                    <!-- Dinâmico -->
+                                </div>
+                            </div>
+                            <button class="w-full py-2 text-[10px] font-bold border border-zinc-800 rounded-lg text-zinc-400 hover:bg-zinc-800 transition-all">Relatório Completo</button>
                         </div>
                     </div>
                 </div>
-            `;
-        };
+            </div>
+        `;
 
-        const renderChat = (container) => {
-            container.classList.add('flex', 'p-0');
-            container.innerHTML = `
-                <div class="w-72 border-r border-zinc-900 flex flex-col bg-black/20">
-                    <div class="p-6 border-b border-zinc-900"><p class="font-bold text-xs uppercase tracking-widest text-zinc-500">Contactos</p></div>
-                    <div class="flex-1 overflow-y-auto custom-scrollbar">
-                        ${teamData.map(u => `
-                            <div class="p-4 flex items-center gap-3 hover:bg-white/5 cursor-pointer border-b border-zinc-900/50">
-                                <div class="w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center font-bold text-[10px]">${u.displayName[0]}</div>
-                                <div>
-                                    <p class="font-bold text-[11px]">${u.displayName}</p>
-                                    <p class="text-[9px] text-emerald-500">Online</p>
-                                </div>
-                            </div>
-                        `).join('')}
+        const renderStatCard = (label, value, icon, colorClass) => `
+            <div class="glass-panel p-5 rounded-2xl flex flex-col gap-3 group hover:border-cyan-500/30 transition-all">
+                <div class="flex justify-between items-start">
+                    <div class="p-2 bg-zinc-900 rounded-lg"><i data-lucide="${icon}" class="w-4 h-4 ${colorClass}"></i></div>
+                    <span class="text-[8px] font-bold text-emerald-500">+12%</span>
+                </div>
+                <div>
+                    <p class="text-[9px] font-bold text-zinc-500 uppercase tracking-tighter">${label}</p>
+                    <h3 class="text-xl font-mono font-bold tracking-tight">${value}</h3>
+                </div>
+            </div>
+        `;
+
+        // --- MODULE: CHAT (WHATSAPP STYLE) ---
+        const renderChatUI = () => `
+            <div class="h-full flex">
+                <!-- Chat List -->
+                <div class="w-80 border-r border-zinc-900 flex flex-col bg-black/20">
+                    <div class="p-4 border-b border-zinc-900 bg-black/40">
+                        <div class="relative">
+                            <input type="text" placeholder="Procurar ou começar nova conversa" class="w-full bg-zinc-900/50 border border-zinc-800 rounded-lg py-2 px-10 text-xs focus:outline-none focus:border-cyan-500/50">
+                            <i data-lucide="search" class="w-3.5 h-3.5 absolute left-3.5 top-2.5 text-zinc-500"></i>
+                        </div>
+                    </div>
+                    <div id="contact-list" class="flex-1 overflow-y-auto custom-scrollbar">
+                        <!-- Dinâmico via Firestore -->
+                        <div class="p-8 text-center text-zinc-600 text-[10px] uppercase font-bold tracking-widest">Carregando Contactos...</div>
                     </div>
                 </div>
-                <div class="flex-1 flex flex-col items-center justify-center opacity-20">
-                    <i data-lucide="messages-square" class="w-12 h-12 mb-4"></i>
-                    <p class="font-mono text-[10px] uppercase">Selecione um chat para iniciar</p>
+                <!-- Chat Window -->
+                <div class="flex-1 flex flex-col bg-[#0b141a]">
+                    <div id="chat-header" class="h-16 border-b border-zinc-900/50 flex items-center justify-between px-6 bg-zinc-900/20">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-zinc-800 flex items-center justify-center font-bold text-zinc-600">?</div>
+                            <div>
+                                <p class="font-bold text-xs">Seleccione um chat</p>
+                                <p class="text-[9px] text-zinc-500">Para começar a trocar mensagens</p>
+                            </div>
+                        </div>
+                        <div class="flex gap-4 text-zinc-400">
+                            <i data-lucide="more-vertical" class="w-4 h-4 cursor-pointer"></i>
+                        </div>
+                    </div>
+                    <div id="messages-container" class="flex-1 overflow-y-auto p-6 space-y-4 custom-scrollbar bg-[url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png')] bg-repeat opacity-95">
+                        <!-- Mensagens aqui -->
+                        <div class="h-full flex flex-col items-center justify-center text-zinc-500 text-xs">
+                            <div class="w-16 h-16 bg-zinc-900 rounded-full flex items-center justify-center mb-4"><i data-lucide="lock" class="w-6 h-6"></i></div>
+                            <p>As mensagens são protegidas por criptografia.</p>
+                        </div>
+                    </div>
+                    <div id="chat-input-area" class="h-16 bg-[#202c33] px-6 flex items-center gap-4 hidden">
+                        <i data-lucide="smile" class="w-5 h-5 text-zinc-400 cursor-pointer"></i>
+                        <i data-lucide="paperclip" class="w-5 h-5 text-zinc-400 cursor-pointer"></i>
+                        <input id="message-input" type="text" placeholder="Escreva uma mensagem" class="flex-1 bg-[#2a3942] border-none rounded-lg py-2.5 px-4 text-sm focus:outline-none text-white">
+                        <button onclick="window.chat.send()" class="p-2 hover:bg-white/5 rounded-full text-cyan-500 transition-all"><i data-lucide="send" class="w-5 h-5"></i></button>
+                    </div>
                 </div>
-            `;
+            </div>
+        `;
+
+        window.chat = {
+            activeChat: null,
+            init: () => {
+                onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'team'), (snap) => {
+                    const list = document.getElementById('contact-list');
+                    list.innerHTML = snap.docs.filter(d => d.id !== currentUser.uid).map(doc => {
+                        const data = doc.data();
+                        return `
+                            <div onclick="window.chat.open('${doc.id}', '${data.name}')" class="p-4 border-b border-zinc-900/30 flex items-center gap-4 hover:bg-zinc-800/20 cursor-pointer transition-all">
+                                <div class="relative">
+                                    <div class="w-12 h-12 rounded-full bg-cyan-500/10 text-cyan-500 flex items-center justify-center font-bold">${data.name[0]}</div>
+                                    ${data.status === 'online' ? '<div class="absolute bottom-1 right-0 w-3 h-3 bg-emerald-500 border-2 border-[#111b21] rounded-full"></div>' : ''}
+                                </div>
+                                <div class="flex-1 truncate">
+                                    <div class="flex justify-between items-baseline">
+                                        <p class="font-bold text-xs truncate">${data.name}</p>
+                                        <span class="text-[8px] text-zinc-500 uppercase">Agora</span>
+                                    </div>
+                                    <p class="text-[10px] text-zinc-500 truncate">Clique para enviar mensagem...</p>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                });
+            },
+            open: (targetId, targetName) => {
+                window.chat.activeChat = [currentUser.uid, targetId].sort().join('_');
+                document.getElementById('chat-input-area').classList.remove('hidden');
+                document.getElementById('chat-header').innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-full bg-cyan-500/20 text-cyan-500 flex items-center justify-center font-bold">${targetName[0]}</div>
+                        <div>
+                            <p class="font-bold text-xs">${targetName}</p>
+                            <p class="text-[9px] text-emerald-500 uppercase font-bold tracking-widest"><span class="status-pulse mr-1 bg-emerald-500"></span> Online</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-4 text-zinc-400">
+                        <i data-lucide="video" class="w-4 h-4 cursor-pointer"></i>
+                        <i data-lucide="phone" class="w-4 h-4 cursor-pointer"></i>
+                        <i data-lucide="search" class="w-4 h-4 cursor-pointer"></i>
+                    </div>
+                `;
+                lucide.createIcons();
+                window.chat.loadMessages();
+            },
+            loadMessages: () => {
+                const q = query(collection(db, 'artifacts', appId, 'public', 'data', 'private_chats', window.chat.activeChat, 'messages'), orderBy('timestamp', 'asc'));
+                onSnapshot(q, (snap) => {
+                    const container = document.getElementById('messages-container');
+                    container.innerHTML = snap.docs.map(d => {
+                        const data = d.data();
+                        const isMe = data.senderId === currentUser.uid;
+                        return `
+                            <div class="flex ${isMe ? 'justify-end' : 'justify-start'} animate-in slide-in-from-bottom-2 duration-300">
+                                <div class="${isMe ? 'chat-bubble-me' : 'chat-bubble-them'} max-w-[70%] p-2 px-3 shadow-sm relative">
+                                    <p class="text-sm leading-relaxed">${data.text}</p>
+                                    <span class="text-[8px] opacity-50 block text-right mt-1 font-mono">${new Date(data.timestamp?.toDate()).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                    container.scrollTop = container.scrollHeight;
+                });
+            },
+            send: async () => {
+                const input = document.getElementById('message-input');
+                if (!input.value.trim()) return;
+                const msg = input.value;
+                input.value = '';
+                await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'private_chats', window.chat.activeChat, 'messages'), {
+                    senderId: currentUser.uid,
+                    text: msg,
+                    timestamp: serverTimestamp()
+                });
+            }
         };
 
-        const renderGit = (container) => {
-            container.innerHTML = `
-                <div class="max-w-3xl mx-auto space-y-4">
-                    <h2 class="text-lg font-bold mb-6">Pull Requests Pendentes</h2>
-                    <div class="glass-panel p-6 rounded-2xl flex items-center justify-between group">
-                        <div class="flex items-center gap-4">
-                            <div class="w-10 h-10 bg-zinc-900 rounded-lg flex items-center justify-center border border-zinc-800">
-                                <i data-lucide="git-pull-request" class="w-5 h-5 text-purple-500"></i>
-                            </div>
+        // --- MODULE: PIPELINE & REALS ---
+        const renderPipeline = () => `
+            <div class="p-8 space-y-6">
+                <div class="glass-panel rounded-2xl p-6 border-l-4 border-emerald-500 bg-emerald-500/5">
+                    <div class="flex justify-between items-center mb-6">
+                        <div class="flex items-center gap-3">
+                            <i data-lucide="check-circle-2" class="text-emerald-500 w-6 h-6"></i>
                             <div>
-                                <p class="font-bold">feat: integration-engine-v2</p>
-                                <p class="text-[10px] text-zinc-500 font-mono">branch: feature/core-updates -> main</p>
+                                <h3 class="font-bold text-sm">PROD ENVIRONMENT</h3>
+                                <p class="text-[9px] text-zinc-500 font-mono">v1.4.2-stable | Last deploy 2h ago</p>
                             </div>
                         </div>
                         <div class="flex gap-2">
-                            <button class="px-4 py-2 bg-emerald-500/10 text-emerald-500 rounded-lg text-[10px] font-bold hover:bg-emerald-500 hover:text-white transition-all">APPROVE</button>
-                            <button class="px-4 py-2 bg-zinc-800 rounded-lg text-[10px] font-bold">VIEW</button>
+                            <span class="px-3 py-1 bg-zinc-900 rounded-full text-[8px] font-bold text-zinc-400">UPTIME: 99.9%</span>
+                            <span class="px-3 py-1 bg-zinc-900 rounded-full text-[8px] font-bold text-zinc-400">REGIONS: 12</span>
+                        </div>
+                    </div>
+                    <div class="flex gap-1 h-1.5 rounded-full overflow-hidden bg-zinc-900">
+                        <div class="w-1/3 bg-emerald-500"></div>
+                        <div class="w-1/4 bg-emerald-400"></div>
+                        <div class="w-1/6 bg-cyan-500"></div>
+                        <div class="flex-1 bg-zinc-800"></div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="glass-panel rounded-2xl p-6">
+                        <h3 class="text-[10px] font-bold text-zinc-500 mb-6 uppercase flex items-center gap-2">
+                            <i data-lucide="git-commit" class="w-3 h-3"></i> Commit Timeline
+                        </h3>
+                        <div id="commit-timeline" class="space-y-6 border-l border-zinc-900 ml-2 pl-6">
+                            <!-- Dinâmico -->
+                        </div>
+                    </div>
+                    <div class="glass-panel rounded-2xl p-6">
+                        <h3 class="text-[10px] font-bold text-zinc-500 mb-6 uppercase flex items-center gap-2">
+                            <i data-lucide="terminal" class="w-3 h-3"></i> System Analytics Logs
+                        </h3>
+                        <div id="analytics-logs" class="space-y-2 font-mono text-[9px]">
+                            <!-- Dinâmico -->
                         </div>
                     </div>
                 </div>
-            `;
-        };
+            </div>
+        `;
 
-        const renderPipeline = (container) => {
-             container.innerHTML = `
-                <div class="max-w-3xl mx-auto space-y-6">
-                    <div class="flex items-center justify-between">
-                        <h2 class="text-lg font-bold">Pipeline Status</h2>
-                        <span class="status-badge bg-emerald-500/20 text-emerald-500 border border-emerald-500/30">Healthy</span>
-                    </div>
-                    <div class="space-y-4">
-                        ${['Build Stage', 'Test Suite', 'Security Audit', 'Deployment'].map((stage, i) => `
-                            <div class="glass-panel p-4 rounded-xl flex items-center gap-4">
-                                <div class="w-6 h-6 rounded-full bg-emerald-500 flex items-center justify-center text-black">
-                                    <i data-lucide="check" class="w-3.5 h-3.5"></i>
-                                </div>
-                                <div class="flex-1">
-                                    <p class="font-bold text-xs">${stage}</p>
-                                    <div class="w-full bg-zinc-800 h-1 rounded-full mt-2">
-                                        <div class="bg-emerald-500 h-full w-full"></div>
-                                    </div>
-                                </div>
-                                <span class="text-[9px] font-mono text-zinc-600">COMPLETED</span>
+        window.pipeline = {
+            init: () => {
+                onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'analytics'), (snap) => {
+                    const logs = document.getElementById('analytics-logs');
+                    const timeline = document.getElementById('commit-timeline');
+                    
+                    logs.innerHTML = snap.docs.slice(0, 15).map(d => `
+                        <div class="flex gap-3 text-zinc-600">
+                            <span class="text-zinc-500">[${new Date().toLocaleTimeString()}]</span>
+                            <span class="text-cyan-500">${d.data().type || 'INFO'}</span>
+                            <span class="truncate text-zinc-400">${d.data().message || 'Sincronização de dados'}</span>
+                        </div>
+                    `).join('');
+
+                    timeline.innerHTML = [
+                        { user: 'Arthur', msg: 'fix: corrigindo overflow no dash', hash: '8f2a11', time: '10m ago' },
+                        { user: 'Claudio', msg: 'feat: integrando firestore v9', hash: '9c1b22', time: '45m ago' },
+                        { user: 'LearnBot', msg: 'chore: automatizando backups', hash: 'bb1201', time: '2h ago' }
+                    ].map(c => `
+                        <div class="relative">
+                            <div class="absolute -left-[31px] top-1 w-2.5 h-2.5 rounded-full bg-zinc-800 border-2 border-cyan-500 ring-4 ring-[#030303]"></div>
+                            <div class="flex justify-between items-baseline mb-1">
+                                <span class="font-bold text-xs text-white">${c.user}</span>
+                                <span class="text-[8px] font-mono text-zinc-600 uppercase">${c.hash}</span>
                             </div>
-                        `).join('')}
-                    </div>
-                </div>
-            `;
-        };
-
-        const updateOnlineBar = () => {
-            const bar = document.getElementById('online-team');
-            if (!bar) return;
-            bar.innerHTML = teamData.map(u => `
-                <div class="w-7 h-7 rounded-full border-2 border-[#030303] bg-zinc-800 flex items-center justify-center text-[8px] font-bold uppercase" title="${u.displayName}">
-                    ${u.displayName[0]}
-                </div>
-            `).join('');
-        };
-
-        const updateVoiceUI = () => {
-            const list = document.getElementById('voice-channels-list');
-            if (!list) return;
-            list.innerHTML = VOICE_CHANNELS.map(ch => `
-                <div class="mb-2">
-                    <button class="w-full flex items-center justify-between px-3 py-1.5 rounded-lg hover:bg-white/5 transition-all group">
-                        <div class="flex items-center gap-2">
-                            <i data-lucide="mic-2" class="w-3.5 h-3.5"></i>
-                            <span class="text-[11px]">${ch}</span>
+                            <p class="text-[10px] text-zinc-400">${c.msg}</p>
+                            <span class="text-[8px] text-zinc-600 mt-2 block uppercase font-bold">${c.time}</span>
                         </div>
+                    `).join('');
+                });
+            }
+        };
+
+        // --- MODULE: BRANCHES & PR ---
+        const renderGitBranches = () => `
+            <div class="p-8 space-y-6">
+                <div class="flex justify-between items-end mb-8">
+                    <div>
+                        <h2 class="text-2xl font-bold tracking-tight">Pull Requests</h2>
+                        <p class="text-zinc-500 text-xs">Aguardando revisão e merge para a branch main.</p>
+                    </div>
+                    <button class="bg-cyan-500 hover:bg-cyan-600 text-black px-4 py-2 rounded-lg text-xs font-bold flex items-center gap-2 transition-all">
+                        <i data-lucide="plus" class="w-4 h-4"></i> New Pull Request
                     </button>
                 </div>
-            `).join('');
-            lucide.createIcons();
+                
+                <div class="space-y-4" id="branches-list">
+                    <!-- Dinâmico -->
+                </div>
+            </div>
+        `;
+
+        window.branches = {
+            init: () => {
+                const branches = [
+                    { id: 'PR-102', title: 'Refactor Auth Service', branch: 'refactor/auth', author: 'Claudio', status: 'pending' },
+                    { id: 'PR-103', title: 'Add real-time voice indicators', branch: 'feat/voice-ui', author: 'Arthur', status: 'approved' },
+                    { id: 'PR-104', title: 'Fix dashboard responsive grid', branch: 'fix/mobile-dash', author: 'Dev_9281', status: 'pending' }
+                ];
+                
+                const list = document.getElementById('branches-list');
+                list.innerHTML = branches.map(b => `
+                    <div class="glass-panel rounded-xl p-5 flex items-center justify-between border-l-4 ${b.status === 'approved' ? 'border-emerald-500' : 'border-amber-500'} group hover:bg-white/[0.02] transition-all">
+                        <div class="flex items-center gap-5">
+                            <div class="w-10 h-10 bg-zinc-900 rounded-lg flex items-center justify-center text-zinc-500">
+                                <i data-lucide="git-pull-request" class="w-5 h-5"></i>
+                            </div>
+                            <div>
+                                <div class="flex items-center gap-2 mb-1">
+                                    <span class="text-xs font-bold text-white">${b.title}</span>
+                                    <span class="text-[8px] font-mono bg-zinc-800 px-1.5 py-0.5 rounded text-zinc-500">${b.id}</span>
+                                </div>
+                                <div class="flex items-center gap-3 text-[9px] text-zinc-500 uppercase font-bold">
+                                    <span class="flex items-center gap-1 text-cyan-500"><i data-lucide="git-branch" class="w-2.5 h-2.5"></i> ${b.branch}</span>
+                                    <span>by ${b.author}</span>
+                                    <span>Updated 4h ago</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex gap-2">
+                            ${b.status === 'pending' ? `
+                                <button class="px-4 py-2 bg-emerald-500/10 hover:bg-emerald-500 text-emerald-500 hover:text-black rounded-lg text-[10px] font-bold uppercase transition-all border border-emerald-500/20">Aprovar</button>
+                                <button class="px-4 py-2 bg-zinc-900 hover:bg-zinc-800 text-zinc-400 rounded-lg text-[10px] font-bold uppercase transition-all border border-zinc-800">Review</button>
+                            ` : `
+                                <button class="px-4 py-2 bg-cyan-500 text-black rounded-lg text-[10px] font-bold uppercase transition-all shadow-lg shadow-cyan-500/20">Confirmar Merge</button>
+                            `}
+                        </div>
+                    </div>
+                `).join('');
+                lucide.createIcons();
+            }
         };
 
-        // --- Bootstrap ---
+        // --- MODULE: VOICE SYSTEM (SIMULATED) ---
+        window.voice = {
+            requestJoin: async () => {
+                if (!currentUser) return;
+                const voiceRef = doc(db, 'artifacts', appId, 'public', 'data', 'team', currentUser.uid);
+                await updateDoc(voiceRef, { voiceStatus: 'requested' });
+                // Envia log analítico
+                await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'analytics'), {
+                    type: 'VOICE',
+                    message: `Dev_${currentUser.uid.slice(0,4)} solicitou entrada na sala de voz.`,
+                    timestamp: serverTimestamp()
+                });
+            }
+        };
+
+        const startRealtimeSync = () => {
+            // Sync Voice Team
+            onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'team'), (snap) => {
+                const list = document.getElementById('voice-team-list');
+                const topList = document.getElementById('top-team-list');
+                
+                const users = snap.docs.map(d => d.data());
+                
+                list.innerHTML = users.filter(u => u.voiceStatus).map(u => `
+                    <div class="flex items-center justify-between p-2 rounded-lg bg-white/5 border border-white/5">
+                        <div class="flex items-center gap-2">
+                            <div class="w-2 h-2 rounded-full ${u.voiceStatus === 'active' ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'}"></div>
+                            <span class="text-[10px] font-bold truncate">${u.name}</span>
+                        </div>
+                        <span class="text-[8px] text-zinc-600 uppercase">${u.voiceStatus === 'active' ? 'Em Call' : 'Aguardando'}</span>
+                    </div>
+                `).join('') || '<p class="text-[8px] text-zinc-600 italic px-3">Nenhum canal ativo</p>';
+
+                if (topList) {
+                    topList.innerHTML = users.slice(0, 3).map((u, i) => `
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <span class="text-xs font-mono font-bold text-zinc-700">${i+1}.</span>
+                                <div class="w-7 h-7 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center text-[10px] font-bold">${u.name[0]}</div>
+                                <span class="text-xs font-bold">${u.name}</span>
+                            </div>
+                            <span class="text-[10px] font-mono text-cyan-500 font-bold">${90 - (i*15)}%</span>
+                        </div>
+                    `).join('');
+                }
+            });
+        };
+
+        const initAnalyticsCharts = () => {
+            // Simulação de animação de gráfico
+            const bars = document.querySelectorAll('#chart-productivity > div');
+            bars.forEach((bar, i) => {
+                setTimeout(() => {
+                    bar.style.transition = 'height 1s cubic-bezier(0.4, 0, 0.2, 1)';
+                }, i * 100);
+            });
+        };
+
+        // --- APP START ---
         window.onload = () => {
-            startApp();
+            initApp();
             lucide.createIcons();
-            
-            // Set Initial UI
-            document.getElementById('u-name').textContent = currentUser.displayName;
-            document.getElementById('u-avatar').textContent = currentUser.displayName[0];
         };
-
     </script>
 </body>
 </html>

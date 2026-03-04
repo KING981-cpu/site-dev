@@ -86,6 +86,27 @@
             padding: 20px;
             background: linear-gradient(90deg, rgba(6, 182, 212, 0.05) 0%, transparent 100%);
         }
+
+        /* Estilos Chat (WhatsApp Style) */
+        .chat-bubble {
+            max-width: 80%;
+            padding: 10px 14px;
+            border-radius: 14px;
+            font-size: 13px;
+            position: relative;
+        }
+        .chat-sent {
+            background: var(--accent);
+            color: black;
+            border-bottom-right-radius: 2px;
+            align-self: flex-end;
+        }
+        .chat-received {
+            background: #27272a;
+            color: white;
+            border-bottom-left-radius: 2px;
+            align-self: flex-start;
+        }
     </style>
 </head>
 <body class="h-screen flex text-sm selection:bg-cyan-500/30">
@@ -113,6 +134,9 @@
                 </button>
                 <button onclick="switchView('tasks')" class="nav-button" id="btn-tasks">
                     <i data-lucide="list-checks" class="w-4 h-4"></i> Tarefas
+                </button>
+                <button onclick="switchView('chat')" class="nav-button" id="btn-chat">
+                    <i data-lucide="message-square" class="w-4 h-4"></i> Mensagens
                 </button>
                 <button onclick="switchView('team')" class="nav-button" id="btn-team">
                     <i data-lucide="users" class="w-4 h-4"></i> Equipa
@@ -201,6 +225,90 @@
                 </div>
             </div>
 
+            <!-- VIEW: CHAT (WhatsApp Style) -->
+            <div id="view-chat" class="view-content h-full">
+                <div class="flex h-[calc(100vh-12rem)] glass-panel rounded-2xl border border-zinc-800 overflow-hidden">
+                    <!-- Lista de Conversas -->
+                    <div class="w-80 border-r border-zinc-800 flex flex-col bg-black/20">
+                        <div class="p-4 border-b border-zinc-800">
+                            <input type="text" placeholder="Procurar conversa..." class="w-full bg-zinc-900/50 border border-zinc-800 rounded-lg px-3 py-2 text-xs outline-none focus:border-cyan-500">
+                        </div>
+                        <div class="flex-1 overflow-y-auto custom-scrollbar">
+                            <div class="p-4 flex items-center gap-3 bg-cyan-500/10 border-l-2 border-cyan-500 cursor-pointer">
+                                <div class="w-10 h-10 rounded-full bg-zinc-800 flex items-center justify-center font-bold text-cyan-500">G</div>
+                                <div class="flex-1">
+                                    <div class="flex justify-between items-center mb-0.5">
+                                        <span class="font-bold text-xs">Canal Geral</span>
+                                        <span class="text-[9px] text-zinc-500">14:20</span>
+                                    </div>
+                                    <p class="text-[10px] text-zinc-400 truncate">Admin: Bem-vindos ao novo OS!</p>
+                                </div>
+                            </div>
+                            <div class="p-4 flex items-center gap-3 hover:bg-white/5 cursor-pointer transition-colors">
+                                <div class="w-10 h-10 rounded-full bg-zinc-800 flex items-center justify-center font-bold text-zinc-500">D</div>
+                                <div class="flex-1">
+                                    <div class="flex justify-between items-center mb-0.5">
+                                        <span class="font-bold text-xs">Dev Team</span>
+                                        <span class="text-[9px] text-zinc-500">Ontem</span>
+                                    </div>
+                                    <p class="text-[10px] text-zinc-500 truncate">Aguardando deploy...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Janela de Chat -->
+                    <div class="flex-1 flex flex-col">
+                        <!-- Topo do Chat -->
+                        <div class="p-4 border-b border-zinc-800 flex items-center justify-between bg-black/10">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-full bg-cyan-500 flex items-center justify-center font-bold text-black text-xs">G</div>
+                                <div>
+                                    <p class="font-bold text-xs">Canal Geral</p>
+                                    <p class="text-[9px] text-emerald-500 uppercase font-bold tracking-widest">12 membros online</p>
+                                </div>
+                            </div>
+                            <div class="flex gap-4 text-zinc-500">
+                                <i data-lucide="phone" class="w-4 h-4 cursor-pointer hover:text-white"></i>
+                                <i data-lucide="video" class="w-4 h-4 cursor-pointer hover:text-white"></i>
+                                <i data-lucide="more-vertical" class="w-4 h-4 cursor-pointer hover:text-white"></i>
+                            </div>
+                        </div>
+
+                        <!-- Mensagens -->
+                        <div class="flex-1 p-6 overflow-y-auto custom-scrollbar flex flex-col gap-4 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]">
+                            <div class="chat-bubble chat-received">
+                                <p class="text-[10px] font-bold text-cyan-500 mb-1">Membro_04</p>
+                                Olá a todos! Alguém já testou o novo cronómetro?
+                                <span class="block text-[8px] text-zinc-500 mt-1 text-right">14:15</span>
+                            </div>
+
+                            <div class="chat-bubble chat-sent">
+                                Sim, está a funcionar perfeitamente com o LocalStorage.
+                                <span class="block text-[8px] text-cyan-900 mt-1 text-right">14:18</span>
+                            </div>
+
+                            <div class="chat-bubble chat-received">
+                                <p class="text-[10px] font-bold text-cyan-500 mb-1">Membro_04</p>
+                                Excelente. Vou começar o meu turno agora.
+                                <span class="block text-[8px] text-zinc-500 mt-1 text-right">14:20</span>
+                            </div>
+                        </div>
+
+                        <!-- Input de Mensagem -->
+                        <div class="p-4 border-t border-zinc-800 bg-black/20">
+                            <div class="flex gap-3">
+                                <button class="text-zinc-500 hover:text-white"><i data-lucide="plus" class="w-5 h-5"></i></button>
+                                <input type="text" placeholder="Escreve uma mensagem..." class="flex-1 bg-zinc-900/80 border border-zinc-800 rounded-xl px-4 py-2 outline-none focus:border-cyan-500 text-xs">
+                                <button class="bg-cyan-600 hover:bg-cyan-500 text-black p-2 rounded-xl transition-all">
+                                    <i data-lucide="send" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- VIEW: TEAM -->
             <div id="view-team" class="view-content">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -245,7 +353,17 @@
             
             document.getElementById(`view-${view}`).classList.add('active');
             document.getElementById(`btn-${view}`).classList.add('active');
-            document.getElementById('view-title').innerText = view.charAt(0).toUpperCase() + view.slice(1);
+            
+            // Mapeamento de nomes para o título
+            const titles = {
+                'dashboard': 'Dashboard',
+                'timer': 'Cronómetro',
+                'tasks': 'Lista de Tarefas',
+                'chat': 'Centro de Mensagens',
+                'team': 'Gestão de Equipa'
+            };
+            
+            document.getElementById('view-title').innerText = titles[view] || view;
             
             state.activeView = view;
             lucide.createIcons();

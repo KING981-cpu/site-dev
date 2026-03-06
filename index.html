@@ -99,7 +99,9 @@
             timerRunning: false,
             timerStart: null, // timestamp when started
             timerElapsed: 0, // milliseconds already elapsed
-            timerIntervalId: null
+            timerIntervalId: null,
+            // calendário state
+            events: JSON.parse(localStorage.getItem('pro_dashboard_events')) || []
         };
 
         const appContainer = document.getElementById('app');
@@ -256,6 +258,17 @@
                 saveLinks();
                 render();
             };
+            const evtForm = document.getElementById('eventForm');
+            if (evtForm) {
+                evtForm.onsubmit = (e) => {
+                    e.preventDefault();
+                    const date = document.getElementById('eventDate').value;
+                    const text = document.getElementById('eventText').value.trim();
+                    if (!date || !text) return;
+                    addEvent(date, text);
+                    render();
+                };
+            }
         }
 
         function renderSidebarBtn(icon, label) {
@@ -290,6 +303,22 @@
             localStorage.setItem('pro_dashboard_links', JSON.stringify(state.links));
         }
 
+        // calendar helper
+        function saveEvents() {
+            localStorage.setItem('pro_dashboard_events', JSON.stringify(state.events));
+        }
+
+        function addEvent(date, text) {
+            state.events.push({ id: Date.now().toString(), date, text });
+            saveEvents();
+        }
+
+        function removeEvent(id) {
+            state.events = state.events.filter(e => e.id !== id);
+            saveEvents();
+            render();
+        }
+
         function logout() {
             state.isLoggedIn = false;
             render();
@@ -313,6 +342,12 @@
             const m = Math.floor((totalSeconds % 3600) / 60).toString().padStart(2, '0');
             const s = (totalSeconds % 60).toString().padStart(2, '0');
             return `${h}:${m}:${s}`;
+        }
+
+        function formatDate(dateStr) {
+            // expects YYYY-MM-DD
+            const d = new Date(dateStr);
+            return d.toLocaleDateString(undefined, { day:'2-digit', month:'2-digit', year:'numeric' });
         }
 
         function startStopTimer() {
@@ -449,7 +484,34 @@
                 case 'Equipe':
                     return `<div class="text-white">👥 <strong>Equipe</strong> (apenas você está online)</div>`;
                 case 'Calendário':
-                    return `<div class="text-white">📅 <strong>Calendário</strong> (nenhum evento agendado)</div>`;
+                    // sort future events by date
+                    const today = new Date().toISOString().split('T')[0];
+                    const upcoming = state.events
+                        .filter(e => e.date >= today)
+                        .sort((a,b)=> a.date.localeCompare(b.date));
+                    return `
+                        <div class="max-w-lg mx-auto space-y-6">
+                            <h3 class="text-xl font-bold text-white">Calendário de Eventos</h3>
+                            <form id="eventForm" class="flex gap-2">
+                                <input type="date" id="eventDate" class="bg-[#121212] border border-[#333] p-2 rounded-lg text-white" required>
+                                <input type="text" id="eventText" placeholder="Descrição" class="flex-1 bg-[#121212] border border-[#333] p-2 rounded-lg text-white" required>
+                                <button type="submit" class="bg-cyan-500 px-4 rounded-lg text-black font-bold">Adicionar</button>
+                            </form>
+                            <div id="eventList" class="space-y-2">
+                                ${upcoming.map(e=>`
+                                    <div class="flex justify-between items-center p-2 bg-[#1e1e1e] rounded-lg">
+                                        <div class="text-sm">
+                                            <span class="font-mono">${formatDate(e.date)}</span> – ${e.text}
+                                        </div>
+                                        <button onclick="removeEvent('${e.id}')" class="text-red-500 hover:bg-red-500/10 p-1 rounded">
+                                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                        </button>
+                                    </div>
+                                `).join('')}
+                                ${upcoming.length===0?'<p class="text-slate-500">Sem eventos futuros.</p>':''}
+                            </div>
+                        </div>
+                    `;
                 default:
                     return `<div class="text-white">Página desconhecida</div>`;
             }

@@ -113,7 +113,10 @@
             // calendário state
             events: JSON.parse(localStorage.getItem('pro_dashboard_events')) || [],
             currentMonth: new Date(),
-            selectedDate: null
+            selectedDate: null,
+            // tarefas e notas
+            tasks: JSON.parse(localStorage.getItem('pro_dashboard_tasks')) || [],
+            notes: JSON.parse(localStorage.getItem('pro_dashboard_notes')) || []
         };
 
         const appContainer = document.getElementById('app');
@@ -281,6 +284,26 @@
                     render();
                 };
             }
+            const taskForm = document.getElementById('taskForm');
+            if (taskForm) {
+                taskForm.onsubmit = e => {
+                    e.preventDefault();
+                    const t = document.getElementById('taskInput').value.trim();
+                    if (!t) return;
+                    addTask(t);
+                    render();
+                };
+            }
+            const noteForm = document.getElementById('noteForm');
+            if (noteForm) {
+                noteForm.onsubmit = e => {
+                    e.preventDefault();
+                    const n = document.getElementById('noteInput').value.trim();
+                    if (!n) return;
+                    addNote(n);
+                    render();
+                };
+            }
         }
 
         function renderSidebarBtn(icon, label) {
@@ -328,6 +351,44 @@
         function removeEvent(id) {
             state.events = state.events.filter(e => e.id !== id);
             saveEvents();
+            render();
+        }
+
+        // tasks
+        function saveTasks() {
+            localStorage.setItem('pro_dashboard_tasks', JSON.stringify(state.tasks));
+        }
+
+        function addTask(text) {
+            state.tasks.push({ id: Date.now().toString(), text, done: false });
+            saveTasks();
+        }
+
+        function toggleTask(id) {
+            state.tasks = state.tasks.map(t => t.id === id ? {...t, done: !t.done} : t);
+            saveTasks();
+            render();
+        }
+
+        function removeTask(id) {
+            state.tasks = state.tasks.filter(t => t.id !== id);
+            saveTasks();
+            render();
+        }
+
+        // notes
+        function saveNotes() {
+            localStorage.setItem('pro_dashboard_notes', JSON.stringify(state.notes));
+        }
+
+        function addNote(text) {
+            state.notes.push({ id: Date.now().toString(), text });
+            saveNotes();
+        }
+
+        function removeNote(id) {
+            state.notes = state.notes.filter(n => n.id !== id);
+            saveNotes();
             render();
         }
 
@@ -502,9 +563,50 @@
                         </div>
                     `;
                 case 'Tarefas':
-                    return `<div class="text-white">📝 <strong>Tarefas</strong> (ainda não existem tarefas)</div>`;
+                    return `
+                        <div class="max-w-lg mx-auto space-y-6">
+                            <h3 class="text-xl font-bold text-white">Tarefas</h3>
+                            <form id="taskForm" class="flex gap-2">
+                                <input type="text" id="taskInput" class="flex-1 bg-[#121212] border border-[#333] p-2 rounded-lg text-white" placeholder="Nova tarefa" required>
+                                <button type="submit" class="bg-cyan-500 px-4 rounded-lg text-black font-bold">Adicionar</button>
+                            </form>
+                            <div class="space-y-2">
+                                ${state.tasks.map(t=>`
+                                    <div class="flex items-center justify-between p-2 bg-[#1e1e1e] rounded-lg">
+                                        <label class="flex items-center gap-2">
+                                            <input type="checkbox" ${t.done?'checked':''} onchange="toggleTask('${t.id}')" />
+                                            <span class="${t.done?'line-through text-slate-500':''}">${t.text}</span>
+                                        </label>
+                                        <button onclick="removeTask('${t.id}')" class="text-red-500 hover:bg-red-500/10 p-1 rounded">
+                                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                        </button>
+                                    </div>
+                                `).join('')}
+                                ${state.tasks.length===0?'<p class="text-slate-500">Sem tarefas.</p>':''}
+                            </div>
+                        </div>
+                    `;
                 case 'Notas':
-                    return `<div class="text-white">📄 <strong>Notas</strong> (imprima os seus pensamentos aqui)</div>`;
+                    return `
+                        <div class="max-w-lg mx-auto space-y-6">
+                            <h3 class="text-xl font-bold text-white">Notas</h3>
+                            <form id="noteForm" class="flex gap-2">
+                                <input type="text" id="noteInput" class="flex-1 bg-[#121212] border border-[#333] p-2 rounded-lg text-white" placeholder="Nova nota" required>
+                                <button type="submit" class="bg-cyan-500 px-4 rounded-lg text-black font-bold">Adicionar</button>
+                            </form>
+                            <div class="space-y-2">
+                                ${state.notes.map(n=>`
+                                    <div class="flex justify-between p-2 bg-[#1e1e1e] rounded-lg">
+                                        <span class="text-sm">${n.text}</span>
+                                        <button onclick="removeNote('${n.id}')" class="text-red-500 hover:bg-red-500/10 p-1 rounded">
+                                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                        </button>
+                                    </div>
+                                `).join('')}
+                                ${state.notes.length===0?'<p class="text-slate-500">Sem notas.</p>':''}
+                            </div>
+                        </div>
+                    `;
                 case 'Equipe':
                     return `<div class="text-white">👥 <strong>Equipe</strong> (apenas você está online)</div>`;
                 case 'Calendário':

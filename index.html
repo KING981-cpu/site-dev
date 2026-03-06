@@ -94,7 +94,12 @@
             links: JSON.parse(localStorage.getItem('pro_dashboard_links')) || INITIAL_LINKS,
             isModalOpen: false,
             activeTab: 'Dashboard',
-            theme: localStorage.getItem('pro_dashboard_theme') || 'dark'
+            theme: localStorage.getItem('pro_dashboard_theme') || 'dark',
+            // cronômetro state
+            timerRunning: false,
+            timerStart: null, // timestamp when started
+            timerElapsed: 0, // milliseconds already elapsed
+            timerIntervalId: null
         };
 
         const appContainer = document.getElementById('app');
@@ -301,6 +306,45 @@
             render();
         }
 
+        // format milliseconds to HH:MM:SS
+        function formatTime(ms) {
+            const totalSeconds = Math.floor(ms / 1000);
+            const h = Math.floor(totalSeconds / 3600).toString().padStart(2, '0');
+            const m = Math.floor((totalSeconds % 3600) / 60).toString().padStart(2, '0');
+            const s = (totalSeconds % 60).toString().padStart(2, '0');
+            return `${h}:${m}:${s}`;
+        }
+
+        function startStopTimer() {
+            if (state.timerRunning) {
+                // stop
+                clearInterval(state.timerIntervalId);
+                state.timerElapsed += Date.now() - state.timerStart;
+                state.timerRunning = false;
+            } else {
+                // start
+                state.timerStart = Date.now();
+                state.timerIntervalId = setInterval(() => {
+                    const now = Date.now();
+                    const displayed = state.timerElapsed + (now - state.timerStart);
+                    const dispEl = document.getElementById('timerDisplay');
+                    if (dispEl) dispEl.innerText = formatTime(displayed);
+                }, 200);
+                state.timerRunning = true;
+            }
+            render();
+        }
+
+        function resetTimer() {
+            clearInterval(state.timerIntervalId);
+            state.timerRunning = false;
+            state.timerElapsed = 0;
+            state.timerStart = null;
+            const disp = document.getElementById('timerDisplay');
+            if (disp) disp.innerText = formatTime(0);
+            render();
+        }
+
         function getContentForTab() {
             switch (state.activeTab) {
                 case 'Dashboard':
@@ -384,7 +428,20 @@
                         </div>
                     `;
                 case 'Cronómetro':
-                    return `<div class="text-white">⏱️ <strong>Cronómetro</strong> (funcionalidade ainda não implementada)</div>`;
+                    const currentTime = state.timerRunning
+                        ? state.timerElapsed + (Date.now() - state.timerStart)
+                        : state.timerElapsed;
+                    return `
+                        <div class="max-w-sm mx-auto text-center space-y-4">
+                            <div id="timerDisplay" class="text-4xl font-mono font-bold text-cyan-400">${formatTime(currentTime)}</div>
+                            <div class="flex justify-center gap-4">
+                                <button onclick="startStopTimer()" class="px-4 py-2 bg-cyan-500 rounded-xl text-black font-bold">
+                                    ${state.timerRunning ? 'Parar' : 'Iniciar'}
+                                </button>
+                                <button onclick="resetTimer()" class="px-4 py-2 bg-red-500 rounded-xl text-black font-bold">Reset</button>
+                            </div>
+                        </div>
+                    `;
                 case 'Tarefas':
                     return `<div class="text-white">📝 <strong>Tarefas</strong> (ainda não existem tarefas)</div>`;
                 case 'Notas':

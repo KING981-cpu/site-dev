@@ -8,6 +8,11 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Firebase (compat) -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
         
@@ -91,6 +96,19 @@
 
     <script>
         // --- ESTADO DA APLICAÇÃO ---
+        // --- FIREBASE CONFIGURATION (replace with your project's values) ---
+        const firebaseConfig = {
+            apiKey: "your-api-key",
+            authDomain: "your-project.firebaseapp.com",
+            projectId: "your-project-id",
+            storageBucket: "your-project.appspot.com",
+            messagingSenderId: "sender-id",
+            appId: "app-id"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
         const INITIAL_LINKS = [
             { id: '1', name: 'Deepsek', url: 'https://www.deepseek.com/', color: 'bg-black text-white' },
             { id: '2', name: 'Resposta Certa', url: 'https://respostacerta.com/', color: 'bg-red-500 text-white' },
@@ -101,7 +119,7 @@
         let state = {
             isLoggedIn: false,
             userEmail: '',
-            links: JSON.parse(localStorage.getItem('pro_dashboard_links')) || INITIAL_LINKS,
+            links: INITIAL_LINKS.slice(),
             isModalOpen: false,
             activeTab: 'Dashboard',
             theme: localStorage.getItem('pro_dashboard_theme') || 'dark',
@@ -111,21 +129,23 @@
             timerElapsed: 0, // milliseconds already elapsed
             timerIntervalId: null,
             // calendário state
-            events: JSON.parse(localStorage.getItem('pro_dashboard_events')) || [],
+            events: [],
             currentMonth: new Date(),
             selectedDate: null,
             // tarefas e notas
-            tasks: JSON.parse(localStorage.getItem('pro_dashboard_tasks')) || [],
-            notes: JSON.parse(localStorage.getItem('pro_dashboard_notes')) || []
+            tasks: [],
+            notes: []
         };
 
         const appContainer = document.getElementById('app');
 
-        function render() {
+        async function render() {
             applyTheme();
             if (!state.isLoggedIn) {
                 renderLogin();
             } else {
+                // fetch user data from firestore once when rendering main layout
+                await loadUserData();
                 renderMainLayout();
             }
             lucide.createIcons();
@@ -157,11 +177,26 @@
                     </form>
                 </div>
             `;
-            document.getElementById('loginForm').onsubmit = (e) => {
+            document.getElementById('loginForm').onsubmit = async (e) => {
                 e.preventDefault();
-                state.isLoggedIn = true;
-                state.userEmail = document.getElementById('email').value;
-                render();
+                const email = document.getElementById('email').value;
+                const pass = document.getElementById('password').value;
+                try {
+                    const userCred = await auth.signInWithEmailAndPassword(email, pass);
+                    state.isLoggedIn = true;
+                    state.userEmail = userCred.user.email;
+                    render();
+                } catch(err) {
+                    if (err.code === 'auth/user-not-found') {
+                        // create account automatically
+                        const userCred = await auth.createUserWithEmailAndPassword(email, pass);
+                        state.isLoggedIn = true;
+                        state.userEmail = userCred.user.email;
+                        render();
+                    } else {
+                        alert(err.message);
+                    }
+                }
             };
         }
 
@@ -334,13 +369,17 @@
             toggleModal(true); // Manter modal aberto
         }
 
-        function saveLinks() {
-            localStorage.setItem('pro_dashboard_links', JSON.stringify(state.links));
+        async function saveLinks() {
+            if (!state.isLoggedIn) return;
+            const uid = auth.currentUser.uid;
+            await db.collection('users').doc(uid).set({ links: state.links }, { merge: true });
         }
 
         // calendar helper
-        function saveEvents() {
-            localStorage.setItem('pro_dashboard_events', JSON.stringify(state.events));
+        async function saveEvents() {
+            if (!state.isLoggedIn) return;
+            const uid = auth.currentUser.uid;
+            await db.collection('users').doc(uid).set({ events: state.events }, { merge: true });
         }
 
         function addEvent(date, text) {
@@ -355,8 +394,10 @@
         }
 
         // tasks
-        function saveTasks() {
-            localStorage.setItem('pro_dashboard_tasks', JSON.stringify(state.tasks));
+        async function saveTasks() {
+            if (!state.isLoggedIn) return;
+            const uid = auth.currentUser.uid;
+            await db.collection('users').doc(uid).set({ tasks: state.tasks }, { merge: true });
         }
 
         function addTask(text) {
@@ -377,8 +418,10 @@
         }
 
         // notes
-        function saveNotes() {
-            localStorage.setItem('pro_dashboard_notes', JSON.stringify(state.notes));
+        async function saveNotes() {
+            if (!state.isLoggedIn) return;
+            const uid = auth.currentUser.uid;
+            await db.collection('users').doc(uid).set({ notes: state.notes }, { merge: true });
         }
 
         function addNote(text) {
@@ -405,6 +448,7 @@
         }
 
         function logout() {
+            auth.signOut();
             state.isLoggedIn = false;
             render();
         }
@@ -667,6 +711,19 @@
                     `;
                 default:
                     return `<div class="text-white">Página desconhecida</div>`;
+            }
+        }
+
+        async function loadUserData() {
+            if (!state.isLoggedIn) return;
+            const uid = auth.currentUser.uid;
+            const doc = await db.collection('users').doc(uid).get();
+            if (doc.exists) {
+                const data = doc.data();
+                state.links = data.links || INITIAL_LINKS.slice();
+                state.events = data.events || [];
+                state.tasks = data.tasks || [];
+                state.notes = data.notes || [];
             }
         }
 

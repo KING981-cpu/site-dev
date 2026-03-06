@@ -205,43 +205,6 @@
                         ${getContentForTab()}
                     </div>
                 </main>
-                            <div class="flex justify-between items-center mb-4">
-                                <div class="flex items-center gap-2">
-                                    <span>🚀</span>
-                                    <h3 class="font-bold text-slate-300">Atalhos Rápidos</h3>
-                                </div>
-                                <button onclick="toggleModal(true)" class="text-xs text-cyan-400 hover:text-white transition-colors flex items-center gap-1 font-bold">
-                                    <i data-lucide="plus" class="w-3 h-3"></i> GERIR ATALHOS
-                                </button>
-                            </div>
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                ${state.links.map(link => `
-                                    <a href="${link.url}" target="_blank" class="${link.color} flex items-center justify-center gap-3 py-3 rounded-lg font-bold text-sm hover:opacity-90 transition-all shadow-lg active:scale-95">
-                                        <i data-lucide="globe" class="w-4 h-4"></i> ${link.name}
-                                    </a>
-                                `).join('')}
-                            </div>
-                        </div>
-
-                        <!-- Activity -->
-                        <div class="card rounded-2xl overflow-hidden">
-                            <div class="p-4 border-b border-[#2d2d2d] bg-[#252525] flex items-center gap-2">
-                                <span>📈</span>
-                                <h3 class="font-bold text-sm text-slate-300 uppercase tracking-widest">Atividade Recente</h3>
-                            </div>
-                            <div class="p-4 space-y-3 font-mono text-xs max-h-60 overflow-y-auto custom-scrollbar">
-                                <div class="text-cyan-500 flex gap-4 p-2 bg-cyan-500/5 rounded">
-                                    <span>${new Date().toLocaleTimeString()}</span>
-                                    <span>- ${state.userEmail.split('@')[0]} online</span>
-                                </div>
-                                <div class="text-slate-500 flex gap-4 p-2">
-                                    <span>${new Date().toLocaleTimeString()}</span>
-                                    <span>- Acesso à Área de Trabalho 1</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </main>
 
                 <!-- Modal para adicionar links -->
                 <div id="modal" class="fixed inset-0 modal-bg hidden items-center justify-center z-50 p-4">

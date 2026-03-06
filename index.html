@@ -97,9 +97,9 @@
         // --- SUPABASE CONFIGURATION (replace with your project's values) ---
         const SUPABASE_URL = 'https://ckamxscxszvtkvspksov.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNrYW14c2N4c3p2dGt2c3Brc292Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIxNDU1MDUsImV4cCI6MjA4NzcyMTUwNX0.SSj3h17WN5Ks4NmFouubFmmXejwdNROhXj5s2f91C7Y';
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         // listen for auth state changes
-        supabase.auth.onAuthStateChange((event, session) => {
+        sb.auth.onAuthStateChange((event, session) => {
             if (event === 'SIGNED_IN') {
                 state.isLoggedIn = true;
                 state.userEmail = session.user.email;
@@ -183,7 +183,7 @@
                 const email = document.getElementById('email').value;
                 const pass = document.getElementById('password').value;
 
-                const { data, error } = await supabase.auth.signInWithPassword({
+                const { data, error } = await sb.auth.signInWithPassword({
                     email,
                     password: pass
                 });
@@ -191,7 +191,7 @@
                 if (error) {
                     if (error.message.includes('Invalid login credentials')) {
                         // user does not exist, sign up
-                        const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+                        const { data: signUpData, error: signUpError } = await sb.auth.signUp({
                             email,
                             password: pass
                         });
@@ -382,10 +382,10 @@
         }
 
         async function saveLinks() {
-            const { data: { user } } = await supabase.auth.getUser();
+            const { data: { user } } = await sb.auth.getUser();
             if (!user) return;
             // delete existing links
-            await supabase.from('links').delete().eq('user_id', user.id);
+            await sb.from('links').delete().eq('user_id', user.id);
             if (state.links.length > 0) {
                 const linksToInsert = state.links.map(l => ({
                     user_id: user.id,
@@ -393,22 +393,22 @@
                     url: l.url,
                     color: l.color
                 }));
-                await supabase.from('links').insert(linksToInsert);
+                await sb.from('links').insert(linksToInsert);
             }
         }
 
         // calendar helper
         async function saveEvents() {
-            const { data: { user } } = await supabase.auth.getUser();
+            const { data: { user } } = await sb.auth.getUser();
             if (!user) return;
-            await supabase.from('events').delete().eq('user_id', user.id);
+            await sb.from('events').delete().eq('user_id', user.id);
             if (state.events.length > 0) {
                 const evts = state.events.map(e => ({
                     user_id: user.id,
                     date: e.date,
                     text: e.text
                 }));
-                await supabase.from('events').insert(evts);
+                await sb.from('events').insert(evts);
             }
         }
 
@@ -426,16 +426,16 @@
 
         // tasks
         async function saveTasks() {
-            const { data: { user } } = await supabase.auth.getUser();
+            const { data: { user } } = await sb.auth.getUser();
             if (!user) return;
-            await supabase.from('tasks').delete().eq('user_id', user.id);
+            await sb.from('tasks').delete().eq('user_id', user.id);
             if (state.tasks.length > 0) {
                 const ts = state.tasks.map(t => ({
                     user_id: user.id,
                     text: t.text,
                     done: t.done
                 }));
-                await supabase.from('tasks').insert(ts);
+                await sb.from('tasks').insert(ts);
             }
         }
 
@@ -459,15 +459,14 @@
 
         // notes
         async function saveNotes() {
-            const { data: { user } } = await supabase.auth.getUser();
-            if (!user) return;
-            await supabase.from('notes').delete().eq('user_id', user.id);
+            const { data: { user } } = await sb.auth.getUser();            if (!user) return;
+            await sb.from('notes').delete().eq('user_id', user.id);
             if (state.notes.length > 0) {
                 const ns = state.notes.map(n => ({
                     user_id: user.id,
                     text: n.text
                 }));
-                await supabase.from('notes').insert(ns);
+                await sb.from('notes').insert(ns);
             }
         }
 
@@ -496,7 +495,7 @@
         }
 
         async function logout() {
-            await supabase.auth.signOut();
+            await sb.auth.signOut();
             state.isLoggedIn = false;
             render();
         }
@@ -763,23 +762,23 @@
         }
 
         async function loadUserData() {
-            const { data: { user } } = await supabase.auth.getUser();
+            const { data: { user } } = await sb.auth.getUser();
             if (!user) return;
 
             // Links
-            const { data: links } = await supabase.from('links').select('*').eq('user_id', user.id);
+            const { data: links } = await sb.from('links').select('*').eq('user_id', user.id);
             state.links = links && links.length ? links.map(l=>({ id: l.id, name: l.name, url: l.url, color: l.color })) : INITIAL_LINKS.slice();
 
             // Events
-            const { data: events } = await supabase.from('events').select('*').eq('user_id', user.id);
+            const { data: events } = await sb.from('events').select('*').eq('user_id', user.id);
             state.events = events || [];
 
             // Tasks
-            const { data: tasks } = await supabase.from('tasks').select('*').eq('user_id', user.id);
+            const { data: tasks } = await sb.from('tasks').select('*').eq('user_id', user.id);
             state.tasks = tasks || [];
 
             // Notes
-            const { data: notes } = await supabase.from('notes').select('*').eq('user_id', user.id);
+            const { data: notes } = await sb.from('notes').select('*').eq('user_id', user.id);
             state.notes = notes || [];
         }
 

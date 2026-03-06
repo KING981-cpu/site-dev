@@ -9,10 +9,8 @@
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
 
-    <!-- Firebase (compat) -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+    <!-- Supabase JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
         
@@ -96,18 +94,21 @@
 
     <script>
         // --- ESTADO DA APLICAÇÃO ---
-        // --- FIREBASE CONFIGURATION (replace with your project's values) ---
-        const firebaseConfig = {
-            apiKey: "your-api-key",
-            authDomain: "your-project.firebaseapp.com",
-            projectId: "your-project-id",
-            storageBucket: "your-project.appspot.com",
-            messagingSenderId: "sender-id",
-            appId: "app-id"
-        };
-        firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-        const db = firebase.firestore();
+        // --- SUPABASE CONFIGURATION (replace with your project's values) ---
+        const SUPABASE_URL = 'https://ckamxscxszvtkvspksov.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNrYW14c2N4c3p2dGt2c3Brc292Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIxNDU1MDUsImV4cCI6MjA4NzcyMTUwNX0.SSj3h17WN5Ks4NmFouubFmmXejwdNROhXj5s2f91C7Y';
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        // listen for auth state changes
+        supabase.auth.onAuthStateChange((event, session) => {
+            if (event === 'SIGNED_IN') {
+                state.isLoggedIn = true;
+                state.userEmail = session.user.email;
+                loadUserData().then(() => render());
+            } else if (event === 'SIGNED_OUT') {
+                state.isLoggedIn = false;
+                render();
+            }
+        });
 
         const INITIAL_LINKS = [
             { id: '1', name: 'Deepsek', url: 'https://www.deepseek.com/', color: 'bg-black text-white' },
@@ -144,7 +145,7 @@
             if (!state.isLoggedIn) {
                 renderLogin();
             } else {
-                // fetch user data from firestore once when rendering main layout
+                // fetch user data from Supabase once when rendering main layout
                 await loadUserData();
                 renderMainLayout();
             }
@@ -181,21 +182,35 @@
                 e.preventDefault();
                 const email = document.getElementById('email').value;
                 const pass = document.getElementById('password').value;
-                try {
-                    const userCred = await auth.signInWithEmailAndPassword(email, pass);
-                    state.isLoggedIn = true;
-                    state.userEmail = userCred.user.email;
-                    render();
-                } catch(err) {
-                    if (err.code === 'auth/user-not-found') {
-                        // create account automatically
-                        const userCred = await auth.createUserWithEmailAndPassword(email, pass);
+
+                const { data, error } = await supabase.auth.signInWithPassword({
+                    email,
+                    password: pass
+                });
+
+                if (error) {
+                    if (error.message.includes('Invalid login credentials')) {
+                        // user does not exist, sign up
+                        const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+                            email,
+                            password: pass
+                        });
+                        if (signUpError) {
+                            alert(signUpError.message);
+                            return;
+                        }
                         state.isLoggedIn = true;
-                        state.userEmail = userCred.user.email;
+                        state.userEmail = signUpData.user.email;
+                        await loadUserData();
                         render();
                     } else {
-                        alert(err.message);
+                        alert(error.message);
                     }
+                } else {
+                    state.isLoggedIn = true;
+                    state.userEmail = data.user.email;
+                    await loadUserData();
+                    render();
                 }
             };
         }
@@ -293,7 +308,7 @@
             `;
 
             // Lógica do Form
-            document.getElementById('addLinkForm').onsubmit = (e) => {
+            document.getElementById('addLinkForm').onsubmit = async (e) => {
                 e.preventDefault();
                 const name = document.getElementById('siteName').value;
                 let url = document.getElementById('siteUrl').value;
@@ -305,38 +320,35 @@
                     url: url,
                     color: 'bg-slate-700 text-white'
                 });
-                saveLinks();
+                await saveLinks();
                 render();
             };
             const evtForm = document.getElementById('eventForm');
             if (evtForm) {
-                evtForm.onsubmit = (e) => {
+                evtForm.onsubmit = async (e) => {
                     e.preventDefault();
                     if (!state.selectedDate) return;
                     const text = document.getElementById('eventText').value.trim();
                     if (!text) return;
-                    addEvent(state.selectedDate, text);
-                    render();
+                    await addEvent(state.selectedDate, text);
                 };
             }
             const taskForm = document.getElementById('taskForm');
             if (taskForm) {
-                taskForm.onsubmit = e => {
+                taskForm.onsubmit = async e => {
                     e.preventDefault();
                     const t = document.getElementById('taskInput').value.trim();
                     if (!t) return;
-                    addTask(t);
-                    render();
+                    await addTask(t);
                 };
             }
             const noteForm = document.getElementById('noteForm');
             if (noteForm) {
-                noteForm.onsubmit = e => {
+                noteForm.onsubmit = async e => {
                     e.preventDefault();
                     const n = document.getElementById('noteInput').value.trim();
                     if (!n) return;
-                    addNote(n);
-                    render();
+                    await addNote(n);
                 };
             }
         }
@@ -362,76 +374,112 @@
             modal.classList.toggle('flex', show);
         }
 
-        function removeLink(id) {
+        async function removeLink(id) {
             state.links = state.links.filter(l => l.id !== id);
-            saveLinks();
+            await saveLinks();
             render();
             toggleModal(true); // Manter modal aberto
         }
 
         async function saveLinks() {
-            if (!state.isLoggedIn) return;
-            const uid = auth.currentUser.uid;
-            await db.collection('users').doc(uid).set({ links: state.links }, { merge: true });
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) return;
+            // delete existing links
+            await supabase.from('links').delete().eq('user_id', user.id);
+            if (state.links.length > 0) {
+                const linksToInsert = state.links.map(l => ({
+                    user_id: user.id,
+                    name: l.name,
+                    url: l.url,
+                    color: l.color
+                }));
+                await supabase.from('links').insert(linksToInsert);
+            }
         }
 
         // calendar helper
         async function saveEvents() {
-            if (!state.isLoggedIn) return;
-            const uid = auth.currentUser.uid;
-            await db.collection('users').doc(uid).set({ events: state.events }, { merge: true });
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) return;
+            await supabase.from('events').delete().eq('user_id', user.id);
+            if (state.events.length > 0) {
+                const evts = state.events.map(e => ({
+                    user_id: user.id,
+                    date: e.date,
+                    text: e.text
+                }));
+                await supabase.from('events').insert(evts);
+            }
         }
 
-        function addEvent(date, text) {
+        async function addEvent(date, text) {
             state.events.push({ id: Date.now().toString(), date, text });
-            saveEvents();
+            await saveEvents();
+            render();
         }
 
-        function removeEvent(id) {
+        async function removeEvent(id) {
             state.events = state.events.filter(e => e.id !== id);
-            saveEvents();
+            await saveEvents();
             render();
         }
 
         // tasks
         async function saveTasks() {
-            if (!state.isLoggedIn) return;
-            const uid = auth.currentUser.uid;
-            await db.collection('users').doc(uid).set({ tasks: state.tasks }, { merge: true });
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) return;
+            await supabase.from('tasks').delete().eq('user_id', user.id);
+            if (state.tasks.length > 0) {
+                const ts = state.tasks.map(t => ({
+                    user_id: user.id,
+                    text: t.text,
+                    done: t.done
+                }));
+                await supabase.from('tasks').insert(ts);
+            }
         }
 
-        function addTask(text) {
+        async function addTask(text) {
             state.tasks.push({ id: Date.now().toString(), text, done: false });
-            saveTasks();
-        }
-
-        function toggleTask(id) {
-            state.tasks = state.tasks.map(t => t.id === id ? {...t, done: !t.done} : t);
-            saveTasks();
+            await saveTasks();
             render();
         }
 
-        function removeTask(id) {
+        async function toggleTask(id) {
+            state.tasks = state.tasks.map(t => t.id === id ? {...t, done: !t.done} : t);
+            await saveTasks();
+            render();
+        }
+
+        async function removeTask(id) {
             state.tasks = state.tasks.filter(t => t.id !== id);
-            saveTasks();
+            await saveTasks();
             render();
         }
 
         // notes
         async function saveNotes() {
-            if (!state.isLoggedIn) return;
-            const uid = auth.currentUser.uid;
-            await db.collection('users').doc(uid).set({ notes: state.notes }, { merge: true });
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) return;
+            await supabase.from('notes').delete().eq('user_id', user.id);
+            if (state.notes.length > 0) {
+                const ns = state.notes.map(n => ({
+                    user_id: user.id,
+                    text: n.text
+                }));
+                await supabase.from('notes').insert(ns);
+            }
         }
 
-        function addNote(text) {
+        async function addNote(text) {
             state.notes.push({ id: Date.now().toString(), text });
-            saveNotes();
+            await saveNotes();
+            render();
         }
 
-        function removeNote(id) {
+        async function removeNote(id) {
             state.notes = state.notes.filter(n => n.id !== id);
-            saveNotes();
+            await saveNotes();
             render();
         }
 
@@ -447,8 +495,8 @@
             render();
         }
 
-        function logout() {
-            auth.signOut();
+        async function logout() {
+            await supabase.auth.signOut();
             state.isLoggedIn = false;
             render();
         }
@@ -715,16 +763,24 @@
         }
 
         async function loadUserData() {
-            if (!state.isLoggedIn) return;
-            const uid = auth.currentUser.uid;
-            const doc = await db.collection('users').doc(uid).get();
-            if (doc.exists) {
-                const data = doc.data();
-                state.links = data.links || INITIAL_LINKS.slice();
-                state.events = data.events || [];
-                state.tasks = data.tasks || [];
-                state.notes = data.notes || [];
-            }
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) return;
+
+            // Links
+            const { data: links } = await supabase.from('links').select('*').eq('user_id', user.id);
+            state.links = links && links.length ? links.map(l=>({ id: l.id, name: l.name, url: l.url, color: l.color })) : INITIAL_LINKS.slice();
+
+            // Events
+            const { data: events } = await supabase.from('events').select('*').eq('user_id', user.id);
+            state.events = events || [];
+
+            // Tasks
+            const { data: tasks } = await supabase.from('tasks').select('*').eq('user_id', user.id);
+            state.tasks = tasks || [];
+
+            // Notes
+            const { data: notes } = await supabase.from('notes').select('*').eq('user_id', user.id);
+            state.notes = notes || [];
         }
 
         // Início

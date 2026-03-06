@@ -16,6 +16,25 @@
             background-color: #121212;
             color: #e2e8f0;
         }
+        body.light {
+            background-color: #f9f9f9;
+            color: #1a1a1a;
+        }
+        body.light .sidebar {
+            background-color: #fff;
+            border-right: 1px solid #ddd;
+        }
+        body.light .card {
+            background-color: #fff;
+            border: 1px solid #ddd;
+        }
+        body.light .btn-sidebar {
+            color: #555;
+        }
+        body.light .btn-sidebar:hover, body.light .btn-sidebar.active {
+            background-color: #00bcd4;
+            color: #000;
+        }
 
         .sidebar {
             background-color: #1a1a1a;
@@ -74,12 +93,14 @@
             userEmail: '',
             links: JSON.parse(localStorage.getItem('pro_dashboard_links')) || INITIAL_LINKS,
             isModalOpen: false,
-            activeTab: 'Dashboard'
+            activeTab: 'Dashboard',
+            theme: localStorage.getItem('pro_dashboard_theme') || 'dark'
         };
 
         const appContainer = document.getElementById('app');
 
         function render() {
+            applyTheme();
             if (!state.isLoggedIn) {
                 renderLogin();
             } else {
@@ -90,23 +111,24 @@
 
         // --- LOGIN ---
         function renderLogin() {
-            appContainer.className = "h-screen flex items-center justify-center bg-[#0a0a0a]";
+            const dark = state.theme === 'dark';
+            appContainer.className = `h-screen flex items-center justify-center ${dark ? 'bg-[#0a0a0a]' : 'bg-[#f0f0f0]'}`;
             appContainer.innerHTML = `
                 <div class="max-w-md w-full p-8 card rounded-2xl shadow-2xl fade-in">
                     <div class="text-center mb-8">
                         <div class="bg-cyan-500/10 w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-cyan-500/20">
                             <i data-lucide="rocket" class="text-cyan-400 w-10 h-10"></i>
                         </div>
-                        <h1 class="text-2xl font-bold text-white">Aceder ao Sistema</h1>
-                        <p class="text-slate-500 mt-2">Introduza as suas credenciais</p>
+                        <h1 class="text-2xl font-bold ${dark ? 'text-white' : 'text-black'}">Aceder ao Sistema</h1>
+                        <p class="${dark ? 'text-slate-500' : 'text-gray-600'} mt-2">Introduza as suas credenciais</p>
                     </div>
                     <form id="loginForm" class="space-y-6">
                         <div>
-                            <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Email</label>
+                            <label class="block text-xs font-semibold ${dark ? 'text-slate-400' : 'text-gray-700'} uppercase tracking-wider mb-2">Email</label>
                             <input type="email" id="email" class="w-full bg-[#121212] border border-[#333] p-3 rounded-xl focus:border-cyan-500 outline-none transition-all text-white" placeholder="utilizador@exemplo.com" required>
                         </div>
                         <div>
-                            <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Senha</label>
+                            <label class="block text-xs font-semibold ${dark ? 'text-slate-400' : 'text-gray-700'} uppercase tracking-wider mb-2">Senha</label>
                             <input type="password" id="password" class="w-full bg-[#121212] border border-[#333] p-3 rounded-xl focus:border-cyan-500 outline-none transition-all text-white" placeholder="••••••••" required>
                         </div>
                         <button type="submit" class="w-full bg-cyan-500 hover:bg-cyan-400 text-black font-bold py-3 rounded-xl transition-all shadow-lg shadow-cyan-500/20">Entrar</button>
@@ -155,8 +177,8 @@
 
                     <div class="mt-auto pt-4 border-t border-[#2d2d2d] space-y-1">
                         <p class="text-[10px] font-bold text-slate-500 px-3 mb-2 uppercase tracking-[0.2em]">Preferências</p>
-                        <button class="btn-sidebar w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium">
-                            <i data-lucide="moon" class="w-4 h-4"></i> Tema
+                        <button onclick="toggleTheme()" class="btn-sidebar w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium">
+                            <i data-lucide="${state.theme==='dark' ? 'moon' : 'sun'}" class="w-4 h-4"></i> Tema
                         </button>
                         <button onclick="logout()" class="btn-sidebar w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium hover:!bg-red-500/10 hover:!text-red-500">
                             <i data-lucide="log-out" class="w-4 h-4"></i> Sair
@@ -180,48 +202,9 @@
 
                     <!-- Scrollable Area -->
                     <div class="flex-1 overflow-y-auto p-8 custom-scrollbar">
-                        <!-- Stats Grid -->
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                            <div class="card p-6 rounded-2xl relative overflow-hidden group">
-                                <div class="flex justify-between items-center mb-6">
-                                    <div class="flex items-center gap-2 text-slate-400">
-                                        <i data-lucide="timer" class="w-4 h-4"></i>
-                                        <span class="text-xs font-bold uppercase tracking-wider">Tempo</span>
-                                    </div>
-                                    <span class="bg-cyan-500/20 text-cyan-400 text-[10px] font-bold px-2 py-0.5 rounded">0h</span>
-                                </div>
-                                <div class="text-4xl font-mono font-bold text-cyan-400 mb-4 tracking-widest">00:00:00</div>
-                                <div class="w-full bg-[#2d2d2d] h-1.5 rounded-full overflow-hidden">
-                                    <div class="bg-cyan-500 w-[0%] h-full"></div>
-                                </div>
-                                <p class="text-[10px] text-slate-500 mt-2">0% da meta (6h)</p>
-                            </div>
-
-                            <div class="card p-6 rounded-2xl">
-                                <div class="flex items-center gap-2 text-slate-400 mb-6">
-                                    <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
-                                    <span class="text-xs font-bold uppercase tracking-wider">Estatísticas</span>
-                                </div>
-                                <div class="text-center">
-                                    <div class="text-4xl font-bold text-white mb-1">0</div>
-                                    <div class="text-cyan-400 text-sm font-bold uppercase tracking-widest">Sessões</div>
-                                </div>
-                            </div>
-
-                            <div class="card p-6 rounded-2xl">
-                                <div class="flex items-center gap-2 text-slate-400 mb-6">
-                                    <i data-lucide="users-2" class="w-4 h-4"></i>
-                                    <span class="text-xs font-bold uppercase tracking-wider">Equipe</span>
-                                </div>
-                                <div class="text-center">
-                                    <div class="text-4xl font-bold text-orange-500 mb-1">1</div>
-                                    <div class="text-cyan-400 text-sm font-bold uppercase tracking-widest">Online</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Quick Links -->
-                        <div class="mb-8">
+                        ${getContentForTab()}
+                    </div>
+                </main>
                             <div class="flex justify-between items-center mb-4">
                                 <div class="flex items-center gap-2">
                                     <span>🚀</span>
@@ -342,6 +325,114 @@
         function logout() {
             state.isLoggedIn = false;
             render();
+        }
+
+        // apply current theme class to body
+        function applyTheme() {
+            document.body.classList.toggle('light', state.theme === 'light');
+        }
+
+        function toggleTheme() {
+            state.theme = state.theme === 'dark' ? 'light' : 'dark';
+            localStorage.setItem('pro_dashboard_theme', state.theme);
+            render();
+        }
+
+        function getContentForTab() {
+            switch (state.activeTab) {
+                case 'Dashboard':
+                    return `
+                        <!-- Stats Grid -->
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                            <div class="card p-6 rounded-2xl relative overflow-hidden group">
+                                <div class="flex justify-between items-center mb-6">
+                                    <div class="flex items-center gap-2 text-slate-400">
+                                        <i data-lucide="timer" class="w-4 h-4"></i>
+                                        <span class="text-xs font-bold uppercase tracking-wider">Tempo</span>
+                                    </div>
+                                    <span class="bg-cyan-500/20 text-cyan-400 text-[10px] font-bold px-2 py-0.5 rounded">0h</span>
+                                </div>
+                                <div class="text-4xl font-mono font-bold text-cyan-400 mb-4 tracking-widest">00:00:00</div>
+                                <div class="w-full bg-[#2d2d2d] h-1.5 rounded-full overflow-hidden">
+                                    <div class="bg-cyan-500 w-[0%] h-full"></div>
+                                </div>
+                                <p class="text-[10px] text-slate-500 mt-2">0% da meta (6h)</p>
+                            </div>
+
+                            <div class="card p-6 rounded-2xl">
+                                <div class="flex items-center gap-2 text-slate-400 mb-6">
+                                    <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+                                    <span class="text-xs font-bold uppercase tracking-wider">Estatísticas</span>
+                                </div>
+                                <div class="text-center">
+                                    <div class="text-4xl font-bold text-white mb-1">0</div>
+                                    <div class="text-cyan-400 text-sm font-bold uppercase tracking-widest">Sessões</div>
+                                </div>
+                            </div>
+
+                            <div class="card p-6 rounded-2xl">
+                                <div class="flex items-center gap-2 text-slate-400 mb-6">
+                                    <i data-lucide="users-2" class="w-4 h-4"></i>
+                                    <span class="text-xs font-bold uppercase tracking-wider">Equipe</span>
+                                </div>
+                                <div class="text-center">
+                                    <div class="text-4xl font-bold text-orange-500 mb-1">1</div>
+                                    <div class="text-cyan-400 text-sm font-bold uppercase tracking-widest">Online</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Quick Links -->
+                        <div class="mb-8">
+                            <div class="flex justify-between items-center mb-4">
+                                <div class="flex items-center gap-2">
+                                    <span>🚀</span>
+                                    <h3 class="font-bold text-slate-300">Atalhos Rápidos</h3>
+                                </div>
+                                <button onclick="toggleModal(true)" class="text-xs text-cyan-400 hover:text-white transition-colors flex items-center gap-1 font-bold">
+                                    <i data-lucide="plus" class="w-3 h-3"></i> GERIR ATALHOS
+                                </button>
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                ${state.links.map(link => `
+                                    <a href="${link.url}" target="_blank" class="${link.color} flex items-center justify-center gap-3 py-3 rounded-lg font-bold text-sm hover:opacity-90 transition-all shadow-lg active:scale-95">
+                                        <i data-lucide="globe" class="w-4 h-4"></i> ${link.name}
+                                    </a>
+                                `).join('')}
+                            </div>
+                        </div>
+
+                        <!-- Activity -->
+                        <div class="card rounded-2xl overflow-hidden">
+                            <div class="p-4 border-b border-[#2d2d2d] bg-[#252525] flex items-center gap-2">
+                                <span>📈</span>
+                                <h3 class="font-bold text-sm text-slate-300 uppercase tracking-widest">Atividade Recente</h3>
+                            </div>
+                            <div class="p-4 space-y-3 font-mono text-xs max-h-60 overflow-y-auto custom-scrollbar">
+                                <div class="text-cyan-500 flex gap-4 p-2 bg-cyan-500/5 rounded">
+                                    <span>${new Date().toLocaleTimeString()}</span>
+                                    <span>- ${state.userEmail.split('@')[0]} online</span>
+                                </div>
+                                <div class="text-slate-500 flex gap-4 p-2">
+                                    <span>${new Date().toLocaleTimeString()}</span>
+                                    <span>- Acesso à Área de Trabalho 1</span>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                case 'Cronómetro':
+                    return `<div class="text-white">⏱️ <strong>Cronómetro</strong> (funcionalidade ainda não implementada)</div>`;
+                case 'Tarefas':
+                    return `<div class="text-white">📝 <strong>Tarefas</strong> (ainda não existem tarefas)</div>`;
+                case 'Notas':
+                    return `<div class="text-white">📄 <strong>Notas</strong> (imprima os seus pensamentos aqui)</div>`;
+                case 'Equipe':
+                    return `<div class="text-white">👥 <strong>Equipe</strong> (apenas você está online)</div>`;
+                case 'Calendário':
+                    return `<div class="text-white">📅 <strong>Calendário</strong> (nenhum evento agendado)</div>`;
+                default:
+                    return `<div class="text-white">Página desconhecida</div>`;
+            }
         }
 
         // Início

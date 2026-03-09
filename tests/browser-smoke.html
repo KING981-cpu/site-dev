@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Browser Smoke</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 24px;
+      font-family: "Segoe UI", sans-serif;
+      background: #08111f;
+      color: #e8f0fb;
+    }
+
+    pre {
+      padding: 16px;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.05);
+      white-space: pre-wrap;
+    }
+
+    iframe {
+      width: 1px;
+      height: 1px;
+      border: 0;
+      position: absolute;
+      inset: -9999px auto auto -9999px;
+    }
+  </style>
+</head>
+<body data-status="running">
+  <h1>Browser Smoke</h1>
+  <pre id="results">running</pre>
+  <iframe id="app-frame" src="/app.html?reset=1&smoke=1"></iframe>
+
+  <script type="module">
+    const results = [];
+    const output = document.getElementById("results");
+
+    function log(message) {
+      results.push(message);
+      output.textContent = results.join("\n");
+    }
+
+    function assert(condition, message) {
+      if (!condition) {
+        throw new Error(message);
+      }
+      log(`PASS: ${message}`);
+    }
+
+    function wait(ms) {
+      return new Promise((resolve) => setTimeout(resolve, ms));
+    }
+
+    async function waitFor(predicate, timeout = 6000) {
+      const startedAt = Date.now();
+      while (Date.now() - startedAt < timeout) {
+        const value = predicate();
+        if (value) {
+          return value;
+        }
+        await wait(50);
+      }
+      throw new Error("Timeout aguardando inicializacao do app.");
+    }
+
+    async function run() {
+      const frame = document.getElementById("app-frame");
+      await new Promise((resolve) => frame.addEventListener("load", resolve, { once: true }));
+
+      const frameWindow = frame.contentWindow;
+      const frameDocument = frame.contentDocument;
+      const app = await waitFor(() => frameWindow.SiteDevApp);
+
+      const click = (selector) => {
+        const element = frameDocument.querySelector(selector);
+        if (!element) {
+          throw new Error(`Elemento nao encontrado: ${selector}`);
+        }
+        element.click();
+      };
+
+      const setValue = (selector, value) => {
+        const field = frameDocument.querySelector(selector);
+        if (!field) {
+          throw new Error(`Campo nao encontrado: ${selector}`);
+        }
+        field.value = value;
+      };
+
+      const submit = async (selector) => {
+        const form = frameDocument.querySelector(selector);
+        if (!form) {
+          throw new Error(`Formulario nao encontrado: ${selector}`);
+        }
+        form.requestSubmit();
+        await wait(80);
+      };
+
+      click("[data-action='toggle-theme']");
+      await wait(50);
+      assert(app.getState().ui.theme === "day", "alternancia de tema funciona");
+
+      click("[data-view='tasks']");
+      await wait(60);
+      setValue("input[name='taskTitle']", "Validar pipeline profissional");
+      await submit("#task-form");
+      assert(app.getState().tasks.length === 1, "criacao de tarefa funciona");
+
+      click("[data-action='toggle-task']");
+      await wait(60);
+      assert(app.getState().tasks[0].done === true, "toggle de tarefa funciona");
+
+      click("[data-view='notes']");
+      await wait(60);
+      setValue("input[name='noteTitle']", "Release gate");
+      setValue("textarea[name='noteBody']", "Executar smoke, revisar backup e publicar changelog.");
+      await submit("#note-form");
+      assert(app.getState().notes.length === 1, "criacao de nota funciona");
+
+      click("[data-view='links']");
+      await wait(60);
+      setValue("input[name='linkLabel']", "Homologacao");
+      setValue("input[name='linkUrl']", "staging.example.com");
+      setValue("input[name='linkCategory']", "Deploy");
+      await submit("#link-form");
+      assert(
+        app.getState().links.some((link) => link.label === "Homologacao" && link.url === "https://staging.example.com/"),
+        "criacao de atalho funciona",
+      );
+
+      click("[data-view='calendar']");
+      await wait(60);
+      setValue("input[name='eventTitle']", "Go live");
+      setValue("input[name='eventCategory']", "Release");
+      await submit("#event-form");
+      assert(app.getState().calendar.events.length === 1, "criacao de evento funciona");
+
+      click("[data-view='focus']");
+      await wait(60);
+      click("[data-action='toggle-focus']");
+      await wait(1200);
+      click("[data-action='toggle-focus']");
+      await wait(80);
+      assert(app.getState().focus.sessions.length >= 1, "timer registra sessao de foco");
+
+      click("[data-view='observability']");
+      await wait(60);
+      click("[data-action='create-backup']");
+      await wait(80);
+      assert(app.getBackups().length >= 1, "criacao de backup manual funciona");
+
+      click("[data-view='tasks']");
+      await wait(60);
+      setValue("input[name='taskTitle']", "Tarefa temporaria");
+      await submit("#task-form");
+      assert(app.getState().tasks.length === 2, "mutacao extra antes do restore funciona");
+
+      click("[data-action='restore-latest']");
+      await wait(120);
+      assert(app.getState().tasks.length === 1, "restore do ultimo backup reverte estado");
+
+      let exportTriggered = false;
+      const originalCreateObjectURL = frameWindow.URL.createObjectURL.bind(frameWindow.URL);
+      const originalAnchorClick = frameWindow.HTMLAnchorElement.prototype.click;
+      frameWindow.URL.createObjectURL = (...args) => {
+        exportTriggered = true;
+        return originalCreateObjectURL(...args);
+      };
+      frameWindow.HTMLAnchorElement.prototype.click = function patchedAnchorClick() {
+        if (this.download) {
+          exportTriggered = true;
+          return;
+        }
+        return originalAnchorClick.call(this);
+      };
+
+      click("[data-action='export-bundle']");
+      await wait(80);
+      assert(exportTriggered, "exportacao de backup e disparada");
+
+      assert(app.getState().observability.audit.length > 0, "audit trail esta populada");
+      assert(app.getState().observability.errors.length === 0, "nenhum erro de runtime foi registrado no smoke");
+
+      document.body.dataset.status = "pass";
+      log("SMOKE_RESULT:PASS");
+    }
+
+    run().catch((error) => {
+      document.body.dataset.status = "fail";
+      log(`SMOKE_RESULT:FAIL`);
+      log(error.stack || String(error));
+    });
+  </script>
+</body>
+</html>

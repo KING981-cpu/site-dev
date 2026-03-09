@@ -1,0 +1,37 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build release archive
+        run: |
+          zip -r site-dev-${{ github.ref_name }}.zip \
+            app.html \
+            operacao.html \
+            index.html \
+            equipe.html \
+            README.md \
+            CHANGELOG.md \
+            LICENSE \
+            CNAME \
+            package.json \
+            assets \
+            docs
+
+      - name: Publish GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          body_path: docs/releases/${{ github.ref_name }}.md
+          files: site-dev-${{ github.ref_name }}.zip

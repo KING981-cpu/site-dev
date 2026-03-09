@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Pagina operacional do projeto Site Dev: branches, release flow, backups, observabilidade e links para documentacao.">
+  <title>Operacao | Site Dev</title>
+  <link rel="stylesheet" href="./assets/styles/app.css">
+</head>
+<body class="ops-page">
+  <div class="page-noise" aria-hidden="true"></div>
+  <main class="ops-shell">
+    <header class="panel ops-hero">
+      <span class="eyebrow">Operations deck</span>
+      <h1>Site Dev Release & Operations</h1>
+      <p>
+        Painel auxiliar para release flow, branch strategy, observabilidade local e politica de backup.
+      </p>
+      <div class="action-row">
+        <a class="primary-button" href="./app.html">Abrir workspace</a>
+        <a class="ghost-button" href="https://github.com/KING981-cpu/site-dev" target="_blank" rel="noreferrer">Repositorio</a>
+      </div>
+    </header>
+
+    <section class="dashboard-grid">
+      <article class="panel metric-card">
+        <span class="eyebrow">Release</span>
+        <strong>v1.0.0</strong>
+        <p>Primeira linha profissional do projeto.</p>
+      </article>
+      <article class="panel metric-card">
+        <span class="eyebrow">Branches</span>
+        <strong>main / staging / developer</strong>
+        <p>Fluxo de integracao, homologacao e producao.</p>
+      </article>
+      <article class="panel metric-card">
+        <span class="eyebrow">Backup</span>
+        <strong>JSON export + restore</strong>
+        <p>Snapshots manuais e auto-backups de mutacoes.</p>
+      </article>
+      <article class="panel metric-card">
+        <span class="eyebrow">Observabilidade</span>
+        <strong>Audit + error capture</strong>
+        <p>Trilha local com eventos, falhas e footprint.</p>
+      </article>
+    </section>
+
+    <section class="content-grid">
+      <article class="panel content-card">
+        <div class="section-title-row">
+          <div>
+            <span class="eyebrow">Branch model</span>
+            <h2>Fluxo recomendado</h2>
+          </div>
+        </div>
+        <ul class="branch-list">
+          <li><code>developer</code> consolida as entregas do dia.</li>
+          <li><code>staging</code> recebe apenas o que passou por validacao funcional.</li>
+          <li><code>main</code> recebe tags de release e deploy.</li>
+        </ul>
+      </article>
+
+      <article class="panel content-card">
+        <div class="section-title-row">
+          <div>
+            <span class="eyebrow">Playbook</span>
+            <h2>Artefatos criados</h2>
+          </div>
+        </div>
+        <ul class="branch-list">
+          <li><a href="./README.md">README</a> com badges, scripts e arquitetura.</li>
+          <li><a href="./CHANGELOG.md">CHANGELOG</a> com release notes resumidas.</li>
+          <li><a href="./docs/releases/v1.0.0.md">Release note v1.0.0</a>.</li>
+          <li><a href="./.github/workflows/ci.yml">Workflow de CI</a> e deploy Pages.</li>
+        </ul>
+      </article>
+    </section>
+  </main>
+</body>
+</html>

@@ -1,0 +1,17 @@
+{
+  "name": "site-dev-control-center",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Workspace estatico profissional com backup, observabilidade e smoke tests reais em navegador headless.",
+  "scripts": {
+    "serve": "node scripts/server.mjs",
+    "test": "node --test --test-isolation=none tests/core.test.mjs tests/structure.test.mjs",
+    "test:smoke": "node tests/smoke-runner.mjs",
+    "test:all": "npm run test && npm run test:smoke"
+  },
+  "engines": {
+    "node": ">=24"
+  },
+  "license": "MIT"
+}

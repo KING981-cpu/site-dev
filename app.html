@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Site Dev Control Center: dashboard operacional com foco, tarefas, backup, observabilidade e governanca de release.">
+  <title>Site Dev Control Center</title>
+  <link rel="stylesheet" href="./assets/styles/app.css">
+</head>
+<body>
+  <div class="page-noise" aria-hidden="true"></div>
+  <div class="app-shell" data-app-root>
+    <header class="topbar panel">
+      <div class="brand-block">
+        <span class="eyebrow">Production-grade static workspace</span>
+        <h1 data-role="workspace-name">Site Dev Control Center</h1>
+        <p>
+          Operacao local-first com backup, telemetria, release notes e trilha de auditoria.
+        </p>
+      </div>
+
+      <div class="topbar-metrics">
+        <div class="topbar-chip">
+          <span>Health</span>
+          <strong data-role="health-status" data-tone="healthy">Operacao saudavel</strong>
+        </div>
+        <div class="topbar-chip">
+          <span>Focus</span>
+          <strong data-role="header-focus">00:00:00</strong>
+        </div>
+        <div class="topbar-chip">
+          <span>Tarefas abertas</span>
+          <strong data-role="header-open-tasks">0</strong>
+        </div>
+      </div>
+
+      <div class="topbar-actions">
+        <button class="primary-button" data-action="create-backup">Criar backup</button>
+        <button class="ghost-button" data-action="restore-latest">Restaurar ultimo</button>
+        <button class="ghost-button" data-action="export-bundle">Exportar JSON</button>
+        <button class="ghost-button" data-action="open-import">Importar</button>
+        <button class="ghost-button" data-action="toggle-theme">Tema</button>
+        <input hidden type="file" accept=".json,application/json" data-role="import-input">
+      </div>
+    </header>
+
+    <div class="shell-layout">
+      <aside class="sidebar panel">
+        <div class="sidebar-section">
+          <span class="eyebrow">Navigation</span>
+          <nav class="nav-stack" aria-label="Navegacao principal">
+            <button class="nav-button is-active" data-view="dashboard">Dashboard</button>
+            <button class="nav-button" data-view="focus">Focus Engine</button>
+            <button class="nav-button" data-view="tasks">Tarefas</button>
+            <button class="nav-button" data-view="notes">Notas</button>
+            <button class="nav-button" data-view="links">Atalhos</button>
+            <button class="nav-button" data-view="calendar">Calendario</button>
+            <button class="nav-button" data-view="team">Equipe & Ambientes</button>
+            <button class="nav-button" data-view="observability">Observabilidade</button>
+          </nav>
+        </div>
+
+        <div class="sidebar-section sidebar-footer">
+          <span class="eyebrow">Workspace</span>
+          <div class="identity-card">
+            <strong data-role="workspace-owner">KING981-cpu</strong>
+            <span data-role="theme-label">Modo noturno</span>
+            <span data-role="save-status">Ultimo save: agora</span>
+          </div>
+          <div class="sidebar-links">
+            <a href="./operacao.html">Pagina de operacao</a>
+            <a href="https://github.com/KING981-cpu/site-dev" target="_blank" rel="noreferrer">Repositorio</a>
+          </div>
+        </div>
+      </aside>
+
+      <main class="workspace">
+        <section class="workspace-header">
+          <span class="eyebrow">Current view</span>
+          <h2 data-role="view-title">Dashboard</h2>
+        </section>
+
+        <section class="view-panel" data-view-panel="dashboard">
+          <div class="dashboard-grid">
+            <article class="panel metric-card">
+              <span class="eyebrow">Focus acumulado</span>
+              <strong data-role="metric-focus">00:00:00</strong>
+              <p>Tempo vivo do timer com persistencia local.</p>
+            </article>
+            <article class="panel metric-card">
+              <span class="eyebrow">Tarefas abertas</span>
+              <strong data-role="metric-open-tasks">0</strong>
+              <p>Volume operacional pendente.</p>
+            </article>
+            <article class="panel metric-card">
+              <span class="eyebrow">Eventos futuros</span>
+              <strong data-role="metric-events">0</strong>
+              <p>Calendario de milestones e checkpoints.</p>
+            </article>
+            <article class="panel metric-card">
+              <span class="eyebrow">Storage local</span>
+              <strong data-role="metric-storage">0 B</strong>
+              <p>Footprint atual do workspace persistido.</p>
+            </article>
+            <article class="panel metric-card">
+              <span class="eyebrow">Backups</span>
+              <strong data-role="metric-backups">0</strong>
+              <p>Snapshots prontos para restore.</p>
+            </article>
+            <article class="panel metric-card">
+              <span class="eyebrow">Erros</span>
+              <strong data-role="metric-errors">0</strong>
+              <p>Falhas capturadas pela camada de observabilidade.</p>
+            </article>
+          </div>
+
+          <div class="content-grid">
+            <article class="panel content-card">
+              <div class="section-title-row">
+                <div>
+                  <span class="eyebrow">Quick access</span>
+                  <h3>Atalhos criticos</h3>
+                </div>
+              </div>
+              <div class="quick-links-grid" data-role="dashboard-links"></div>
+            </article>
+
+            <article class="panel content-card">
+              <div class="section-title-row">
+                <div>
+                  <span class="eyebrow">Release snapshot</span>
+                  <h3>Checklist pro</h3>
+                </div>
+              </div>
+              <ul class="release-list" data-role="release-summary"></ul>
+            </article>
+          </div>
+
+          <article class="panel content-card">
+            <div class="section-title-row">
+              <div>
+                <span class="eyebrow">Audit trail</span>
+                <h3>Atividade recente</h3>
+              </div>
+            </div>
+            <div class="timeline" data-role="activity-feed"></div>
+          </article>
+        </section>
+
+        <section class="view-panel" data-view-panel="focus" hidden>
+          <div class="content-grid content-grid--focus">
+            <article class="panel hero-card">
+              <span class="eyebrow">Focus Engine</span>
+              <strong class="hero-value" data-role="focus-display">00:00:00</strong>
+              <div class="progress-track" aria-hidden="true">
+                <div class="progress-fill" data-role="focus-progress"></div>
+              </div>
+              <p data-role="focus-goal">0% da meta de 120 min</p>
+              <div class="action-row">
+                <button class="primary-button" data-action="toggle-focus">Iniciar bloco</button>
+                <button class="ghost-button" data-action="reset-focus">Resetar timer</button>
+              </div>
+            </article>
+
+            <article class="panel content-card">
+              <div class="section-title-row">
+                <div>
+                  <span class="eyebrow">Session ledger</span>
+                  <h3>Historico de blocos</h3>
+                </div>
+              </div>
+              <div class="log-stack" data-role="focus-sessions"></div>
+            </article>
+          </div>
+        </section>
+
+        <section class="view-panel" data-view-panel="tasks" hidden>
+          <article class="panel content-card">
+            <div class="section-title-row">
+              <div>
+                <span class="eyebrow">Execution board</span>
+                <h3>Tarefas</h3>
+              </div>
+              <span class="meta-copy" data-role="tasks-summary">0 abertas de 0 totais</span>
+            </div>
+
+            <form class="form-grid" id="task-form">
+              <label>
+                <span>Titulo</span>
+                <input name="taskTitle" type="text" placeholder="Ex.: revisar deploy da staging" required>
+              </label>
+              <button class="primary-button" type="submit">Adicionar</button>
+            </form>
+
+            <div class="filter-row" aria-label="Filtros de tarefa">
+              <button class="filter-chip is-active" type="button" data-filter="all">Todas</button>
+              <button class="filter-chip" type="button" data-filter="open">Abertas</button>
+              <button class="filter-chip" type="button" data-filter="done">Concluidas</button>
+            </div>
+
+            <div class="list-stack" data-role="tasks-list"></div>
+          </article>
+        </section>
+
+        <section class="view-panel" data-view-panel="notes" hidden>
+          <article class="panel content-card">
+            <div class="section-title-row">
+              <div>
+                <span class="eyebrow">Knowledge base</span>
+                <h3>Notas operacionais</h3>
+              </div>
+            </div>
+
+            <form class="form-grid form-grid--stacked" id="note-form">
+              <label>
+                <span>Titulo</span>
+                <input name="noteTitle" type="text" placeholder="Ex.: checklist de release" required>
+              </label>
+              <label class="form-grid__full">
+                <span>Conteudo</span>
+                <textarea name="noteBody" rows="4" placeholder="Registre contexto tecnico, decisoes e riscos." required></textarea>
+              </label>
+              <button class="primary-button" type="submit">Registrar nota</button>
+            </form>
+
+            <div class="note-grid" data-role="notes-list"></div>
+          </article>
+        </section>
+
+        <section class="view-panel" data-view-panel="links" hidden>
+          <article class="panel content-card">
+            <div class="section-title-row">
+              <div>
+                <span class="eyebrow">Shortcuts</span>
+                <h3>Atalhos confiaveis</h3>
+              </div>
+            </div>
+
+            <form class="form-grid form-grid--three" id="link-form">
+              <label>
+                <span>Nome</span>
+                <input name="linkLabel" type="text" placeholder="Ex.: homologacao" required>
+              </label>
+              <label>
+                <span>URL</span>
+                <input name="linkUrl" type="text" placeholder="https://..." required>
+              </label>
+              <label>
+                <span>Categoria</span>
+                <input name="linkCategory" type="text" placeholder="Operacao">
+              </label>
+              <button class="primary-button" type="submit">Adicionar atalho</button>
+            </form>
+
+            <div class="list-stack" data-role="links-list"></div>
+          </article>
+        </section>
+
+        <section class="view-panel" data-view-panel="calendar" hidden>
+          <div class="content-grid content-grid--calendar">
+            <article class="panel content-card">
+              <div class="section-title-row">
+                <div>
+                  <span class="eyebrow">Planning board</span>
+                  <h3 data-role="calendar-label">Calendario</h3>
+                </div>
+                <div class="action-row">
+                  <button class="ghost-button" type="button" data-action="calendar-prev">Mes anterior</button>
+                  <button class="ghost-button" type="button" data-action="calendar-next">Proximo mes</button>
+                </div>
+              </div>
+
+              <div class="weekday-row" aria-hidden="true">
+                <span>Dom</span>
+                <span>Seg</span>
+                <span>Ter</span>
+                <span>Qua</span>
+                <span>Qui</span>
+                <span>Sex</span>
+                <span>Sab</span>
+              </div>
+              <div class="calendar-grid" data-role="calendar-grid"></div>
+            </article>
+
+            <article class="panel content-card">
+              <div class="section-title-row">
+                <div>
+                  <span class="eyebrow">Selected date</span>
+                  <h3 data-role="calendar-selected"></h3>
+                </div>
+              </div>
+
+              <form class="form-grid form-grid--stacked" id="event-form">
+                <input type="hidden" name="eventDate" data-role="event-date">
+                <label>
+                  <span>Titulo do evento</span>
+                  <input name="eventTitle" type="text" placeholder="Ex.: release candidate" required>
+                </label>
+                <label>
+                  <span>Categoria</span>
+                  <input name="eventCategory" type="text" placeholder="Release">
+                </label>
+                <button class="primary-button" type="submit">Adicionar evento</button>
+              </form>
+
+              <div class="list-stack" data-role="events-list"></div>
+            </article>
+          </div>
+        </section>
+
+        <section class="view-panel" data-view-panel="team" hidden>
+          <div class="content-grid">
+            <article class="panel content-card">
+              <div class="section-title-row">
+                <div>
+                  <span class="eyebrow">Delivery lanes</span>
+                  <h3>Ambientes e status</h3>
+                </div>
+              </div>
+              <div class="stream-grid" data-role="streams-list"></div>
+            </article>
+
+            <article class="panel content-card">
+              <div class="section-title-row">
+                <div>
+                  <span class="eyebrow">Governance</span>
+                  <h3>Estrategia de branch</h3>
+                </div>
+              </div>
+              <ul class="branch-list" data-role="branch-list"></ul>
+            </article>
+          </div>
+        </section>
+
+        <section class="view-panel" data-view-panel="observability" hidden>
+          <div class="dashboard-grid dashboard-grid--compact">
+            <article class="panel metric-card">
+              <span class="eyebrow">Renders</span>
+              <strong data-role="obs-render-count">0</strong>
+              <p>Re-renders produzidos nesta sessao.</p>
+            </article>
+            <article class="panel metric-card">
+              <span class="eyebrow">Boot</span>
+              <strong data-role="obs-boot-ms">0 ms</strong>
+              <p>Tempo de bootstrap do app.</p>
+            </article>
+            <article class="panel metric-card">
+              <span class="eyebrow">Storage</span>
+              <strong data-role="obs-storage">0 B</strong>
+              <p>Consumo local atual.</p>
+            </article>
+            <article class="panel metric-card">
+              <span class="eyebrow">Ultimo backup</span>
+              <strong data-role="obs-last-backup">Nunca</strong>
+              <p>Snapshot mais recente disponivel.</p>
+            </article>
+            <article class="panel metric-card">
+              <span class="eyebrow">Ultimo restore</span>
+              <strong data-role="obs-last-restore">Nunca</strong>
+              <p>Momento da ultima restauracao.</p>
+            </article>
+            <article class="panel metric-card">
+              <span class="eyebrow">Erros</span>
+              <strong data-role="obs-errors">0</strong>
+              <p>Falhas registradas pela camada de runtime.</p>
+            </article>
+          </div>
+
+          <div class="content-grid">
+            <article class="panel content-card">
+              <div class="section-title-row">
+                <div>
+                  <span class="eyebrow">Audit stream</span>
+                  <h3>Log estruturado</h3>
+                </div>
+                <span class="meta-copy" data-role="obs-last-save">Nunca</span>
+              </div>
+              <div class="log-stack" data-role="audit-log"></div>
+            </article>
+
+            <article class="panel content-card">
+              <div class="section-title-row">
+                <div>
+                  <span class="eyebrow">Error inbox</span>
+                  <h3>Falhas capturadas</h3>
+                </div>
+              </div>
+              <div class="log-stack" data-role="error-list"></div>
+            </article>
+          </div>
+
+          <article class="panel content-card">
+            <div class="section-title-row">
+              <div>
+                <span class="eyebrow">Recovery</span>
+                <h3>Backups disponiveis</h3>
+              </div>
+              <div class="action-row">
+                <button class="ghost-button" type="button" data-action="export-bundle">Exportar</button>
+                <button class="ghost-button" type="button" data-action="open-import">Importar</button>
+                <button class="primary-button" type="button" data-action="create-backup">Snapshot manual</button>
+              </div>
+            </div>
+            <div class="list-stack" data-role="backups-list"></div>
+          </article>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <div class="toast" data-role="toast" hidden aria-live="polite"></div>
+
+  <script type="module" src="./assets/scripts/app.js"></script>
+</body>
+</html>

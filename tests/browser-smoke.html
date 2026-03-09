@@ -73,6 +73,10 @@
       const frameWindow = frame.contentWindow;
       const frameDocument = frame.contentDocument;
       const app = await waitFor(() => frameWindow.SiteDevApp);
+      const visiblePanels = () =>
+        [...frameDocument.querySelectorAll("[data-view-panel]")]
+          .filter((panel) => frameWindow.getComputedStyle(panel).display !== "none")
+          .map((panel) => panel.dataset.viewPanel);
 
       const click = (selector) => {
         const element = frameDocument.querySelector(selector);
@@ -99,12 +103,21 @@
         await wait(80);
       };
 
+      assert(
+        JSON.stringify(visiblePanels()) === JSON.stringify(["dashboard"]),
+        "apenas o dashboard fica visivel no carregamento inicial",
+      );
+
       click("[data-action='toggle-theme']");
       await wait(50);
       assert(app.getState().ui.theme === "day", "alternancia de tema funciona");
 
       click("[data-view='tasks']");
       await wait(60);
+      assert(
+        JSON.stringify(visiblePanels()) === JSON.stringify(["tasks"]),
+        "navegacao de menu exibe somente a view clicada",
+      );
       setValue("input[name='taskTitle']", "Validar pipeline profissional");
       await submit("#task-form");
       assert(app.getState().tasks.length === 1, "criacao de tarefa funciona");

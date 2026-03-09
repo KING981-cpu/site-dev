@@ -291,6 +291,10 @@ button {
   gap: 20px;
 }
 
+.view-panel[hidden] {
+  display: none !important;
+}
+
 .dashboard-grid,
 .content-grid {
   display: grid;

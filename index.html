@@ -401,14 +401,17 @@
         async function saveEvents() {
             const { data: { user } } = await sb.auth.getUser();
             if (!user) return;
-            await sb.from('events').delete().eq('user_id', user.id);
+            const { error: delErr } = await sb.from('events').delete().eq('user_id', user.id);
+            if (delErr) console.error('saveEvents delete error', delErr);
             if (state.events.length > 0) {
                 const evts = state.events.map(e => ({
                     user_id: user.id,
-                    date: e.date,
+                    // make sure we send a plain YYYY-MM-DD string; Supabase may convert date types
+                    date: (e.date || '').split('T')[0],
                     text: e.text
                 }));
-                await sb.from('events').insert(evts);
+                const { error: insErr } = await sb.from('events').insert(evts);
+                if (insErr) console.error('saveEvents insert error', insErr);
             }
         }
 
@@ -428,14 +431,16 @@
         async function saveTasks() {
             const { data: { user } } = await sb.auth.getUser();
             if (!user) return;
-            await sb.from('tasks').delete().eq('user_id', user.id);
+            const { error: delErr } = await sb.from('tasks').delete().eq('user_id', user.id);
+            if (delErr) console.error('saveTasks delete error', delErr);
             if (state.tasks.length > 0) {
                 const ts = state.tasks.map(t => ({
                     user_id: user.id,
                     text: t.text,
                     done: t.done
                 }));
-                await sb.from('tasks').insert(ts);
+                const { error: insErr } = await sb.from('tasks').insert(ts);
+                if (insErr) console.error('saveTasks insert error', insErr);
             }
         }
 
@@ -460,13 +465,15 @@
         // notes
         async function saveNotes() {
             const { data: { user } } = await sb.auth.getUser();            if (!user) return;
-            await sb.from('notes').delete().eq('user_id', user.id);
+            const { error: delErr } = await sb.from('notes').delete().eq('user_id', user.id);
+            if (delErr) console.error('saveNotes delete error', delErr);
             if (state.notes.length > 0) {
                 const ns = state.notes.map(n => ({
                     user_id: user.id,
                     text: n.text
                 }));
-                await sb.from('notes').insert(ns);
+                const { error: insErr } = await sb.from('notes').insert(ns);
+                if (insErr) console.error('saveNotes insert error', insErr);
             }
         }
 
@@ -521,9 +528,13 @@
         }
 
         function formatDate(dateStr) {
-            // expects YYYY-MM-DD
-            const d = new Date(dateStr);
-            return d.toLocaleDateString(undefined, { day:'2-digit', month:'2-digit', year:'numeric' });
+            // expects a plain ISO date string (YYYY-MM-DD or YYYY-MM-DDTHH:mm:ss...)
+            // avoid the timezone shift that occurs when using `new Date(...)` directly
+            // by splitting the string ourselves and formatting manually.
+            if (!dateStr) return '';
+            const [ymd] = dateStr.split('T');
+            const [year, month, day] = ymd.split('-');
+            return `${day}/${month}/${year}`;
         }
 
         function startStopTimer() {
@@ -766,19 +777,24 @@
             if (!user) return;
 
             // Links
-            const { data: links } = await sb.from('links').select('*').eq('user_id', user.id);
+            const { data: links, error: linksErr } = await sb.from('links').select('*').eq('user_id', user.id);
+            if (linksErr) console.error('loadUserData links:', linksErr);
             state.links = links && links.length ? links.map(l=>({ id: l.id, name: l.name, url: l.url, color: l.color })) : INITIAL_LINKS.slice();
 
             // Events
-            const { data: events } = await sb.from('events').select('*').eq('user_id', user.id);
-            state.events = events || [];
+            const { data: events, error: eventsErr } = await sb.from('events').select('*').eq('user_id', user.id);
+            if (eventsErr) console.error('loadUserData events:', eventsErr);
+            // normalize date strings to YYYY-MM-DD so we don't run into TZ issues later
+            state.events = (events || []).map(e => ({ ...e, date: (e.date || '').split('T')[0] }));
 
             // Tasks
-            const { data: tasks } = await sb.from('tasks').select('*').eq('user_id', user.id);
+            const { data: tasks, error: tasksErr } = await sb.from('tasks').select('*').eq('user_id', user.id);
+            if (tasksErr) console.error('loadUserData tasks:', tasksErr);
             state.tasks = tasks || [];
 
             // Notes
-            const { data: notes } = await sb.from('notes').select('*').eq('user_id', user.id);
+            const { data: notes, error: notesErr } = await sb.from('notes').select('*').eq('user_id', user.id);
+            if (notesErr) console.error('loadUserData notes:', notesErr);
             state.notes = notes || [];
         }
 
